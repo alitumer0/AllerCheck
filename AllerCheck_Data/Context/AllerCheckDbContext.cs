@@ -7,7 +7,7 @@ using AllerCheck_Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AllerCheck_Data.Context
-{
+{   
     public partial class AllerCheckDbContext : DbContext
     {
         public AllerCheckDbContext(DbContextOptions<AllerCheckDbContext> options) : base(options)

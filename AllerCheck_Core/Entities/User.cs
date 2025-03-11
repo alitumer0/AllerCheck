@@ -28,8 +28,6 @@ namespace AllerCheck_Core.Entities
 
         public DateTime? ModifiedDate { get; set; }       
 
-        public virtual ICollection<SearchHistory> SearchHistories { get; set; } = new List<SearchHistory>();
-
         public virtual Admin CreatedByNavigation { get; set; } = null!;
 
         public virtual ICollection<FavoriteList> FavoriteLists { get; set; } = new List<FavoriteList>();

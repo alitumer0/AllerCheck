@@ -1,15 +1,27 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35605.110 d17.13
+VisualStudioVersion = 17.13.35605.110
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllerCheck.API", "AllerCheck.API\AllerCheck.API.csproj", "{18CA299B-1E06-4862-8582-711EFEDA3CD8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllerCheck.UI", "AllerCheck.UI\AllerCheck.UI.csproj", "{753EE1F3-E2CE-4032-AEA3-5563353A3A68}"
+	ProjectSection(ProjectDependencies) = postProject
+		{18CA299B-1E06-4862-8582-711EFEDA3CD8} = {18CA299B-1E06-4862-8582-711EFEDA3CD8}
+		{9AD6E722-52C3-47D8-ACE8-E125784E2982} = {9AD6E722-52C3-47D8-ACE8-E125784E2982}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllerCheck_Core", "AllerCheck_Core\AllerCheck_Core.csproj", "{9AD6E722-52C3-47D8-ACE8-E125784E2982}"
+	ProjectSection(ProjectDependencies) = postProject
+		{18CA299B-1E06-4862-8582-711EFEDA3CD8} = {18CA299B-1E06-4862-8582-711EFEDA3CD8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllerCheck_Data", "AllerCheck_Data\AllerCheck_Data.csproj", "{C558A330-E82F-4029-800A-F48022D1D646}"
+	ProjectSection(ProjectDependencies) = postProject
+		{18CA299B-1E06-4862-8582-711EFEDA3CD8} = {18CA299B-1E06-4862-8582-711EFEDA3CD8}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllerCheck_Services", "AllerCheck_Services\AllerCheck_Services.csproj", "{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +45,10 @@ Global
 		{C558A330-E82F-4029-800A-F48022D1D646}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C558A330-E82F-4029-800A-F48022D1D646}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C558A330-E82F-4029-800A-F48022D1D646}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
