@@ -14,7 +14,7 @@ namespace AllerCheck.UI.Controllers
     public class AccountController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration; //Todo: IConfiguration kullanımı hakkında bilgi ver.
 
         public AccountController(IConfiguration configuration)
         {
@@ -25,7 +25,7 @@ namespace AllerCheck.UI.Controllers
             };
         }
 
-        public async Task<IActionResult> Profile()
+        public async Task<IActionResult> Profile()  //  Todo: Her profilin kendine ait bir view'i olacak. Bu view'de kullanıcı bilgileri ve güncelleme işlemleri yapılacak. 
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var response = await _httpClient.GetAsync($"api/user/profile/{userId}");
@@ -34,7 +34,7 @@ namespace AllerCheck.UI.Controllers
             {
                 var content = await response.Content.ReadAsStringAsync();
                 var user = JsonSerializer.Deserialize<UserDto>(content);
-                return View(user);
+                return View(user); 
             }
             
             return RedirectToAction("Index", "Home");
@@ -98,7 +98,7 @@ namespace AllerCheck.UI.Controllers
             {
                 return Json(new { success = true });
             }
-            
+            //Todo: Transaction kullanılacak mı burada ? burada bir hata oluşursa blacklistten çıkarılan içeriği tekrar eklemek gerekebilir.Buna da bir bak.
             return Json(new { success = false, message = "İçerik kaldırılırken bir hata oluştu." });
         }
 

@@ -51,7 +51,7 @@ body {
     border: none;
     padding: 10px 25px;
     border-radius: 25px;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease; <!-- buton outline, display, lead ve responsive düzenlemeleri yapılacak. -->
 }
 
 .btn-primary:hover {

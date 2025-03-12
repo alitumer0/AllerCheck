@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AllerCheck_Core.Entities
 {
-    public class RiskStatus
+    public class RiskStatus // is this necessary? ????? :DD 
     {
         public int RiskStatusId { get; set; }
         public string RiskStatusName { get; set; } = null!;

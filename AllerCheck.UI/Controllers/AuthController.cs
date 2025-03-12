@@ -41,7 +41,7 @@ namespace AllerCheck.UI.Controllers
             
             if (success && user != null)
             {
-                // Session'a kullanıcı bilgilerini kaydet
+                //Todo: Session'a kullanıcı bilgilerini kaydet
                 HttpContext.Session.SetString("UserName", user.UserName);
                 HttpContext.Session.SetString("UserEmail", user.MailAdress);
                 HttpContext.Session.SetInt32("UserId", user.Id);

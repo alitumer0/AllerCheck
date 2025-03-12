@@ -43,7 +43,7 @@ namespace AllerCheck_Mapping.Mapping
                     src.FavoriteListDetails.Select(fd => fd.Product)));
             CreateMap<FavoriteListDto, FavoriteList>();
 
-            // BlackList mappingi
+            // BlackList mappingi Todo: Buna da bir bak.Çünkü Blacklist Member gibi kullanılmış.
             CreateMap<BlackList, BlackListDto>()
                 .ForMember(dest => dest.ContentName, opt => opt.MapFrom(src => src.Content.ContentName));
             CreateMap<BlackListDto, BlackList>();
