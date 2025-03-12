@@ -1,0 +1,45 @@
+@model AllerCheck.API.DTOs.UserDTO.UserDto
+
+<div class="container mt-4">
+    <h2>Profil Bilgileri</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="UpdateProfile" method="post">
+                <div class="form-group">
+                    <label asp-for="UserName">Kullanıcı Adı</label>
+                    <input asp-for="UserName" class="form-control" />
+                    <span asp-validation-for="UserName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="UserSurname">Soyadı</label>
+                    <input asp-for="UserSurname" class="form-control" />
+                    <span asp-validation-for="UserSurname" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MailAdress">E-posta</label>
+                    <input asp-for="MailAdress" class="form-control" />
+                    <span asp-validation-for="MailAdress" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Güncelle</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <a asp-action="Blacklist" class="btn btn-warning">Kara Listemi Görüntüle</a>
+            <a asp-action="Favorites" class="btn btn-info">Favorilerimi Görüntüle</a>
+        </div>
+    </div>
+</div> 

@@ -1,46 +1,64 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using AllerCheck.API.DTOs.UserDTO;
 using AllerCheck_Core.Entities;
-using AllerCheck_Core.Repositories.Interfaces;
-using AllerCheck_Core.Services.Interfaces;
+using AllerCheck_Data.Repositories.Interfaces;
+using AllerCheck_Services.Services.Interfaces;
+using AutoMapper;
 
-namespace AllerCheck_Core.Services
+namespace AllerCheck_Services.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
+            _mapper = mapper;
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
-            return _userRepository.GetAll();
+            var users = await _userRepository.GetAllActiveUsersAsync();
+            return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
-        public User GetUserById(int id)
+        public async Task<UserDto> GetUserByIdAsync(int id)
         {
-            return _userRepository.GetById(id);
+            var user = await _userRepository.GetUserByIdWithDetailsAsync(id);
+            return _mapper.Map<UserDto>(user);
         }
 
-        public void CreateUser(User user)
+        public async Task<UserDto> GetUserByEmailAsync(string email)
         {
-            _userRepository.Add(user);
+            var user = await _userRepository.GetUserByEmailAsync(email);
+            return _mapper.Map<UserDto>(user);
         }
 
-        public void UpdateUser(User user)
+        public async Task<bool> CheckUserExistsAsync(string email)
         {
-            _userRepository.Update(user);
+            return await _userRepository.CheckUserExistsAsync(email);
         }
 
-        public void DeleteUser(int id)
+        public async Task<bool> CreateUserAsync(UserDto userDto)
         {
-            _userRepository.Delete(id);
+            var user = _mapper.Map<User>(userDto);
+            user.CreatedDate = DateTime.Now;
+            return await _userRepository.CreateUserWithDetailsAsync(user);
+        }
+
+        public async Task<bool> UpdateUserAsync(UserDto userDto)
+        {
+            var user = _mapper.Map<User>(userDto);
+            return await _userRepository.UpdateUserWithDetailsAsync(user);
+        }
+
+        public async Task<bool> DeleteUserAsync(int id)
+        {
+            return await _userRepository.DeleteUserAndRelatedDataAsync(id);
         }
     }
 }

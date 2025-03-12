@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AllerCheck_Core.Entities;
-using AllerCheck_Core.Repositories.Interfaces;
+using AllerCheck_Data.Repositories.Interfaces;
 using AllerCheck_Data.Context;
+using Microsoft.EntityFrameworkCore;
 
-namespace AllerCheck_Core.Repositories
+namespace AllerCheck_Data.Repositories
 {
     public class CategoryRepository : ICategoryRepository
     {
@@ -18,36 +19,84 @@ namespace AllerCheck_Core.Repositories
             _db = db;
         }
 
-        public IEnumerable<Category> GetAll()
+        public async Task<IEnumerable<Category>> GetAllAsync()
         {
-            return _db.Categories.ToList();
+            return await _db.Categories.ToListAsync();
         }
 
-        public Category GetById(int id)
+        public async Task<Category> GetByIdAsync(int id)
         {
-            return _db.Categories.Find(id);
+            return await _db.Categories.FindAsync(id);
         }
 
-        public void Add(Category category)
+        public async Task<bool> AddAsync(Category category)
         {
-            _db.Categories.Add(category);
-            _db.SaveChanges();
-        }
-
-        public void Update(Category category)
-        {
-            _db.Categories.Update(category);
-            _db.SaveChanges();
-        }
-
-        public void Delete(int id)
-        {
-            var category = GetById(id);
-            if (category != null)
+            bool result = false;
+            using (var transaction = await _db.Database.BeginTransactionAsync())
             {
-            _db.Categories.Remove(category);
-            _db.SaveChanges();
+                try
+                {
+                    await _db.Categories.AddAsync(category);
+                    if (await _db.SaveChangesAsync() > 0)
+                    {
+                        await transaction.CommitAsync();
+                        result = true;
+                    }
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                }
             }
+            return result;
+        }
+
+        public async Task<bool> UpdateAsync(Category category)
+        {
+            bool result = false;
+            using (var transaction = await _db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    _db.Categories.Update(category);
+                    if (await _db.SaveChangesAsync() > 0)
+                    {
+                        await transaction.CommitAsync();
+                        result = true;
+                    }
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                }
+            }
+            return result;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            bool result = false;
+            using (var transaction = await _db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var category = await GetByIdAsync(id);
+                    if (category != null)
+                    {
+                        _db.Categories.Remove(category);
+                        if (await _db.SaveChangesAsync() > 0)
+                        {
+                            await transaction.CommitAsync();
+                            result = true;
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                }
+            }
+            return result;
         }
     }
 }

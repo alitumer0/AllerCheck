@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -22,7 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AllerCheck.API\AllerCheck.API.csproj" />
-    <ProjectReference Include="..\AllerCheck_Data\AllerCheck_Data.csproj" />
+    <ProjectReference Include="..\AllerCheck_Core\AllerCheck_Core.csproj" />
   </ItemGroup>
 
 </Project>

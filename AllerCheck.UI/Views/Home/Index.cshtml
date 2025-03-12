@@ -1,8 +1,49 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-4">
+    <div class="jumbotron text-center bg-light p-5 rounded">
+        <h1 class="display-4">AllerCheck'e Hoş Geldiniz!</h1>
+        <p class="lead">Gıda alerjilerinizi yönetmenin en kolay yolu.</p>
+        <hr class="my-4">
+        <p>Ürünlerin içeriklerini kontrol edin, kara listenizi oluşturun ve favori ürünlerinizi kaydedin.</p>
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <div class="mt-4">
+                <a class="btn btn-primary btn-lg me-2" asp-controller="Auth" asp-action="Register">Hemen Kaydol</a>
+                <a class="btn btn-outline-primary btn-lg" asp-controller="Auth" asp-action="Login">Giriş Yap</a>
+            </div>
+        }
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="card-title">Ürün Tarama</h3>
+                    <p class="card-text">Binlerce ürünün içeriklerini kolayca kontrol edin ve alerjik bileşenleri tespit edin.</p>
+                    <a asp-controller="Home" asp-action="Products" class="btn btn-primary">Ürünleri İncele</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="card-title">Kara Liste</h3>
+                    <p class="card-text">Alerjik olduğunuz içerikleri kara listenize ekleyin ve ürünleri güvenle filtreleyip.</p>
+                    <a asp-controller="Account" asp-action="Blacklist" class="btn btn-primary">Kara Listeni Yönet</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="card-title">Favori Listeler</h3>
+                    <p class="card-text">Güvenle tüketebileceğiniz ürünleri favori listelerinize ekleyin ve kolayca erişin.</p>
+                    <a asp-controller="Account" asp-action="Favorites" class="btn btn-primary">Favorilerini Görüntüle</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

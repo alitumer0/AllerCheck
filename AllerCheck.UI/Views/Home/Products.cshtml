@@ -1,0 +1,44 @@
+@model List<AllerCheck.API.DTOs.ProductDTO.ProductDto>
+
+<div class="container mt-4">
+    <h2>Ürünler</h2>
+
+    <div class="row mb-3">
+        <div class="col">
+            <form asp-action="Search" method="get" class="form-inline">
+                <div class="input-group">
+                    <input type="text" name="query" class="form-control" placeholder="Ürün ara...">
+                    <button type="submit" class="btn btn-primary">Ara</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (var product in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@product.ProductName</h5>
+                        <p class="card-text">
+                            <strong>Kategori:</strong> @product.CategoryName<br/>
+                            <strong>Üretici:</strong> @product.ProducerName
+                        </p>
+                        <button class="btn btn-info btn-sm" data-toggle="collapse" data-target="#contents-@product.Id">
+                            İçerikleri Göster
+                        </button>
+                        <div id="contents-@product.Id" class="collapse mt-2">
+                            <ul class="list-group">
+                                @foreach (var content in product.Contents)
+                                {
+                                    <li class="list-group-item">@content.ContentName</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div> 

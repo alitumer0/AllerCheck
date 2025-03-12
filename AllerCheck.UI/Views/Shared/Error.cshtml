@@ -1,17 +1,25 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Hata";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="container mt-4">
+    <div class="text-center">
+        <h1 class="display-4">Hata</h1>
+        <p class="lead text-danger">Bir hata oluştu.</p>
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+        @if (Model.ShowRequestId)
+        {
+            <p class="text-muted">
+                <small>Hata Kodu: <code>@Model.RequestId</code></small>
+            </p>
+        }
+
+        <div class="mt-4">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Ana Sayfaya Dön</a>
+        </div>
+    </div>
+</div>
 
 <h3>Development Mode</h3>
 <p>

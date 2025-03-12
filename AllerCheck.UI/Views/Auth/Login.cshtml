@@ -1,0 +1,24 @@
+@model AllerCheck.API.DTOs.LoginDTO.LoginDto
+
+<div class="login-form">
+    <form asp-action="Login" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="UserName">Kullanıcı Adı</label>
+            <input asp-for="UserName" class="form-control" />
+            <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="UserPassword">Şifre</label>
+            <input asp-for="UserPassword" type="password" class="form-control" />
+            <span asp-validation-for="UserPassword" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <div class="custom-control custom-checkbox">
+                <input asp-for="RememberMe" type="checkbox" class="custom-control-input" />
+                <label asp-for="RememberMe" class="custom-control-label">Beni Hatırla</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Giriş Yap</button>
+    </form>
+</div> 

@@ -1,0 +1,43 @@
+@model List<AllerCheck.API.DTOs.BlackListDTO.BlackListDto>
+
+<div class="container mt-4">
+    <h2>Kara Listem</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="list-group">
+                @foreach (var item in Model)
+                {
+                    <div class="list-group-item" id="content-@item.BlackListId">
+                        <h5>@item.ContentName</h5>
+                        <button class="btn btn-danger btn-sm float-end" onclick="removeFromBlacklist(@item.BlackListId)">Kaldır</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Profile" class="btn btn-secondary">Profile Dön</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function removeFromBlacklist(contentId) {
+            if (confirm('Bu içeriği kara listenizden kaldırmak istediğinize emin misiniz?')) {
+                $.post('/Account/RemoveFromBlacklist', { contentId: contentId })
+                    .done(function (result) {
+                        if (result.success) {
+                            $('#content-' + contentId).fadeOut(300, function() { $(this).remove(); });
+                        } else {
+                            alert(result.message || 'Bir hata oluştu.');
+                        }
+                    })
+                    .fail(function () {
+                        alert('İşlem sırasında bir hata oluştu.');
+                    });
+            }
+        }
+    </script>
+} 

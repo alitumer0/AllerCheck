@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AllerCheck_Core.Entities;
-using AllerCheck_Core.Repositories.Interfaces;
+using AllerCheck_Data.Repositories.Interfaces;
 using AllerCheck_Data.Context;
+using Microsoft.EntityFrameworkCore;
 
-namespace AllerCheck_Core.Repositories
+namespace AllerCheck_Data.Repositories
 {
     public class ProductRepository : IProductRepository
     {
@@ -18,36 +19,84 @@ namespace AllerCheck_Core.Repositories
             _db = db;
         }
 
-        public IEnumerable<Product> GetAll()
+        public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return _db.Products.ToList();
+            return await _db.Products.ToListAsync();
         }
 
-        public Product GetById(int id)
+        public async Task<Product> GetByIdAsync(int id)
         {
-            return _db.Products.Find(id);
+            return await _db.Products.FindAsync(id);
         }
 
-        public void Add(Product product)
+        public async Task<bool> AddAsync(Product product)
         {
-            _db.Products.Add(product);
-            _db.SaveChanges();
-        }
-
-        public void Update(Product product)
-        {
-            _db.Products.Update(product);
-            _db.SaveChanges();
-        }
-
-        public void Delete(int id)
-        {
-            var product = GetById(id);
-            if (product != null)
+            bool result = false;
+            using (var transaction = await _db.Database.BeginTransactionAsync())
             {
-            _db.Products.Remove(product);
-            _db.SaveChanges();
+                try
+                {
+                    await _db.Products.AddAsync(product);
+                    if (await _db.SaveChangesAsync() > 0)
+                    {
+                        await transaction.CommitAsync();
+                        result = true;
+                    }
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                }
             }
+            return result;
+        }
+
+        public async Task<bool> UpdateAsync(Product product)
+        {
+            bool result = false;
+            using (var transaction = await _db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    _db.Products.Update(product);
+                    if (await _db.SaveChangesAsync() > 0)
+                    {
+                        await transaction.CommitAsync();
+                        result = true;
+                    }
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                }
+            }
+            return result;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            bool result = false;
+            using (var transaction = await _db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var product = await GetByIdAsync(id);
+                    if (product != null)
+                    {
+                        _db.Products.Remove(product);
+                        if (await _db.SaveChangesAsync() > 0)
+                        {
+                            await transaction.CommitAsync();
+                            result = true;
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                }
+            }
+            return result;
         }
     }
 }

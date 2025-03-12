@@ -4,46 +4,53 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AllerCheck_Core.Entities;
-using AllerCheck_Core.Repositories.Interfaces;
-using AllerCheck_Core.Services.Interfaces;
+using AllerCheck_Data.Repositories.Interfaces;
+using AllerCheck.API.DTOs.CategoryDTO;
+using AllerCheck_Data.Repositories.Interfaces;
+using AllerCheck_Services.Services.Interfaces;
+using AutoMapper;
 
-
-
-namespace AllerCheck_Core.Services
+namespace AllerCheck_Services.Services
 {
     public class CategoryService : ICategoryService
     {
         //private readonly ICategoryRepository _categoryRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryRepository categoryRepository)
+        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
+            _mapper = mapper;
         }
 
-        public IEnumerable<Category> GetAllCategories()
+        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
         {
-            return _categoryRepository.GetAll();
+            var categories = await _categoryRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<CategoryDto>>(categories);
         }
 
-        public Category GetCategoryById(int id)
+        public async Task<CategoryDto> GetCategoryByIdAsync(int id)
         {
-            return _categoryRepository.GetById(id);
+            var category = await _categoryRepository.GetByIdAsync(id);
+            return _mapper.Map<CategoryDto>(category);
         }
 
-        public void CreateCategory(Category category)
+        public async Task<bool> CreateCategoryAsync(CategoryDto categoryDto)
         {
-            _categoryRepository.Add(category);
+            var category = _mapper.Map<Category>(categoryDto);
+            return await _categoryRepository.AddAsync(category);
         }
 
-        public void UpdateCategory(Category category)
+        public async Task<bool> UpdateCategoryAsync(CategoryDto categoryDto)
         {
-            _categoryRepository.Update(category);
+            var category = _mapper.Map<Category>(categoryDto);
+            return await _categoryRepository.UpdateAsync(category);
         }
 
-        public void DeleteCategory(int id)
+        public async Task<bool> DeleteCategoryAsync(int id)
         {
-            _categoryRepository.Delete(id);
+            return await _categoryRepository.DeleteAsync(id);
         }
     }
 }

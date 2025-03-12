@@ -14,18 +14,14 @@ namespace AllerCheck_Data.Context
         {
         }
 
-        public virtual DbSet<Admin> Admins { get; set; }
-        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<BlackList> BlackLists { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Content> Contents { get; set; }
-        public virtual DbSet<ContentProduct> ContentProducts { get; set; }
-        public virtual DbSet<Contact> Contacts { get; set; }
-        public virtual DbSet<BlackList> BlackLists { get; set; }
         public virtual DbSet<FavoriteList> FavoriteLists { get; set; }
-        public virtual DbSet<FavoriteListDetail> FavoriteListDetails { get; set; }
         public virtual DbSet<Producer> Producers { get; set; }
         public virtual DbSet<Product> Products { get; set; }
-        public virtual DbSet<RiskStatus> RiskStatuses { get; set; }
+        public virtual DbSet<ContentProduct> ContentProducts { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -34,14 +30,6 @@ namespace AllerCheck_Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Admin>(entity =>
-            {
-                entity.ToTable("Admin");
-                entity.Property(e => e.AdminUsername).HasMaxLength(50);
-                entity.Property(e => e.AdminMail).HasMaxLength(50);
-                entity.Property(e => e.AdminPassword).HasMaxLength(50);
-            });
-
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("User");
@@ -50,12 +38,6 @@ namespace AllerCheck_Data.Context
                 entity.Property(e => e.MailAdress).HasMaxLength(350);
                 entity.Property(e => e.UserPassword).HasMaxLength(50);
                 entity.Property(e => e.CreatedDate).HasColumnType("datetime");
-                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.CreatedByNavigation)
-                    .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.CreatedBy)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
             });
 
             modelBuilder.Entity<Category>(entity =>

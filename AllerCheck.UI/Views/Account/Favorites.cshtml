@@ -1,0 +1,53 @@
+@model List<AllerCheck.API.DTOs.FavoriteListDTO.FavoriteListDto>
+
+<div class="container mt-4">
+    <h2>Favori Listelerim</h2>
+
+    <div class="row">
+        @foreach (var list in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">@list.ListName</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            @foreach (var product in list.Products)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center" id="product-@list.FavoriteListId-@product.Id">
+                                    @product.ProductName
+                                    <button class="btn btn-danger btn-sm" onclick="removeFromFavorites(@list.FavoriteListId, @product.Id)">Kaldır</button>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Profile" class="btn btn-secondary">Profile Dön</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function removeFromFavorites(listId, productId) {
+            if (confirm('Bu ürünü favori listenizden kaldırmak istediğinize emin misiniz?')) {
+                $.post('/Account/RemoveFromFavorites', { listId: listId, productId: productId })
+                    .done(function (result) {
+                        if (result.success) {
+                            $('#product-' + listId + '-' + productId).fadeOut(300, function() { $(this).remove(); });
+                        } else {
+                            alert(result.message || 'Bir hata oluştu.');
+                        }
+                    })
+                    .fail(function () {
+                        alert('İşlem sırasında bir hata oluştu.');
+                    });
+            }
+        }
+    </script>
+} 

@@ -5,15 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using AllerCheck_Core.Entities;
 
-namespace AllerCheck_Core.Repositories.Interfaces
+namespace AllerCheck_Data.Repositories.Interfaces
 {
     public interface IUserRepository
     {
-        IEnumerable<User> GetAll();
-        User GetById(int id);
-        void Add(User user);
-        void Update(User user);
-        void Delete(int id);
-
+        Task<IEnumerable<User>> GetAllActiveUsersAsync();
+        Task<User> GetUserByIdWithDetailsAsync(int id);
+        Task<User> GetUserByEmailAsync(string email);
+        Task<bool> CheckUserExistsAsync(string email);
+        Task<bool> CreateUserWithDetailsAsync(User user, List<FavoriteList> favoriteLists = null, List<BlackList> blackLists = null);
+        Task<bool> UpdateUserWithDetailsAsync(User user, List<FavoriteList> favoriteLists = null, List<BlackList> blackLists = null);
+        Task<bool> DeleteUserAndRelatedDataAsync(int id);
     }
 }

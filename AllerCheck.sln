@@ -23,6 +23,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllerCheck_Data", "AllerChe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllerCheck_Services", "AllerCheck_Services\AllerCheck_Services.csproj", "{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllerCheck_Mapping", "AllerCheck_Mapping\AllerCheck_Mapping.csproj", "{F08DF275-A62E-4538-AE70-F86C21AF0D61}"
+	ProjectSection(ProjectDependencies) = postProject
+		{18CA299B-1E06-4862-8582-711EFEDA3CD8} = {18CA299B-1E06-4862-8582-711EFEDA3CD8}
+		{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228} = {3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +55,10 @@ Global
 		{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3457A24A-B1AB-4BFC-89D7-AE4C8F07F228}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F08DF275-A62E-4538-AE70-F86C21AF0D61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F08DF275-A62E-4538-AE70-F86C21AF0D61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F08DF275-A62E-4538-AE70-F86C21AF0D61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F08DF275-A62E-4538-AE70-F86C21AF0D61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

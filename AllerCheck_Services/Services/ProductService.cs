@@ -4,44 +4,52 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AllerCheck_Core.Entities;
-using AllerCheck_Core.Repositories.Interfaces;
-using AllerCheck_Core.Services.Interfaces;
+using AllerCheck.API.DTOs.ProductDTO;
+using AllerCheck_Data.Repositories.Interfaces;
+using AllerCheck_Services.Services.Interfaces;
+using AutoMapper;
 
-
-namespace AllerCheck_Core.Services
+namespace AllerCheck_Services.Services
 {
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly IMapper _mapper;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductRepository productRepository, IMapper mapper)
         {
             _productRepository = productRepository;
+            _mapper = mapper;
         }
 
-        public IEnumerable<Product> GetAllProducts()
+        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
         {
-            return _productRepository.GetAll();
+            var products = await _productRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<ProductDto>>(products);
         }
 
-        public Product GetProductById(int id)
+        public async Task<ProductDto> GetProductByIdAsync(int id)
         {
-            return _productRepository.GetById(id);
+            var product = await _productRepository.GetByIdAsync(id);
+            return _mapper.Map<ProductDto>(product);
         }
 
-        public void CreateProduct(Product product)
+        public async Task<bool> CreateProductAsync(ProductDto productDto)
         {
-            _productRepository.Add(product);
+            var product = _mapper.Map<Product>(productDto);
+            product.CreatedDate = DateTime.Now;
+            return await _productRepository.AddAsync(product);
         }
 
-        public void UpdateProduct(Product product)
+        public async Task<bool> UpdateProductAsync(ProductDto productDto)
         {
-            _productRepository.Update(product);
+            var product = _mapper.Map<Product>(productDto);
+            return await _productRepository.UpdateAsync(product);
         }
 
-        public void DeleteProduct(int id)
+        public async Task<bool> DeleteProductAsync(int id)
         {
-            _productRepository.Delete(id);
+            return await _productRepository.DeleteAsync(id);
         }
     }
 }

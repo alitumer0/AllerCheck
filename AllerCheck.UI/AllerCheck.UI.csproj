@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -21,6 +22,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AllerCheck_Data\AllerCheck_Data.csproj" />
+    <ProjectReference Include="..\AllerCheck_Mapping\AllerCheck_Mapping.csproj" />
+    <ProjectReference Include="..\AllerCheck_Services\AllerCheck_Services.csproj" />
   </ItemGroup>
 
 </Project>
