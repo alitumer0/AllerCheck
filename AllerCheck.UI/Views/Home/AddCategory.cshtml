@@ -1,0 +1,43 @@
+@model AllerCheck_Core.Entities.Category
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Yeni Kategori Ekle</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="AddCategory" method="post">
+                <div class="mb-3">
+                    <label asp-for="CategoryName" class="form-label">Kategori Adı</label>
+                    <input asp-for="CategoryName" class="form-control" required />
+                    <span asp-validation-for="CategoryName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="TopCategoryId" class="form-label">Üst Kategori (Opsiyonel)</label>
+                    <select asp-for="TopCategoryId" class="form-select">
+                        <option value="">Ana Kategori Olarak Ekle</option>
+                        @foreach (var category in ViewBag.TopCategories)
+                        {
+                            <option value="@category.CategoryId">@category.CategoryName</option>
+                        }
+                    </select>
+                    <span asp-validation-for="TopCategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Kategori Ekle
+                    </button>
+                    <a asp-action="Products" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Geri Dön
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

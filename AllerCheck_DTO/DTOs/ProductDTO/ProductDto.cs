@@ -12,6 +12,8 @@ namespace AllerCheck.API.DTOs.ProductDTO
         public int ProducerId { get; set; }
         public string CategoryName { get; set; }
         public string ProducerName { get; set; }
+        public string AddedByUserName { get; set; }
+        public int FavoriteListDetailId { get; set; }
         public List<ContentDto> Contents { get; set; }
     }
 }

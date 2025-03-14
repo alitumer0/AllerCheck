@@ -34,14 +34,22 @@ namespace AllerCheck_Services.Services
         {
             try
             {
-                var isValid = await ValidateUserCredentialsAsync(loginDto.UserName, loginDto.UserPassword);
-                if (!isValid)
+                // E-posta ile kullanıcıyı bul
+                var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
+                if (user == null)
                 {
-                    return (false, "Geçersiz kullanıcı adı veya şifre.", null);
+                    return (false, "Geçersiz e-posta veya şifre.", null);
                 }
 
-                var user = await GetUserByUsernameAsync(loginDto.UserName);
-                return (true, "Giriş başarılı.", user);
+                // Şifre kontrolü
+                var hashedPassword = HashPassword(loginDto.UserPassword);
+                if (user.UserPassword != hashedPassword)
+                {
+                    return (false, "Geçersiz e-posta veya şifre.", null);
+                }
+
+                var userDto = _mapper.Map<UserDto>(user);
+                return (true, "Giriş başarılı.", userDto);
             }
             catch (Exception ex)
             {
@@ -52,7 +60,6 @@ namespace AllerCheck_Services.Services
 
         public async Task<(bool success, string message)> RegisterAsync(RegisterDto registerDto)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 // Kullanıcı adı veya email kontrolü
@@ -62,31 +69,32 @@ namespace AllerCheck_Services.Services
                 }
 
                 // Şifre hash'leme
-                registerDto.UserPassword = HashPassword(registerDto.UserPassword);
+                var hashedPassword = HashPassword(registerDto.UserPassword);
 
+                // AutoMapper ile dönüşüm
                 var user = _mapper.Map<User>(registerDto);
+                user.UserPassword = hashedPassword;
+                user.CreatedDate = DateTime.Now;
+
                 var result = await _userRepository.CreateUserWithDetailsAsync(user);
 
                 if (result)
                 {
-                    await transaction.CommitAsync();
                     return (true, "Kayıt başarıyla tamamlandı.");
                 }
                 
-                await transaction.RollbackAsync();
                 return (false, "Kayıt işlemi sırasında bir hata oluştu.");
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 // Loglama yapılabilir
-                return (false, "Kayıt işlemi sırasında bir hata oluştu.");
+                return (false, $"Kayıt işlemi sırasında bir hata oluştu: {ex.Message}");
             }
         }
 
-        public async Task<bool> ValidateUserCredentialsAsync(string username, string password)
+        public async Task<bool> ValidateUserCredentialsAsync(string email, string password)
         {
-            var user = await _userRepository.GetUserByEmailAsync(username);
+            var user = await _userRepository.GetUserByEmailAsync(email);
             if (user == null) return false;
 
             var hashedPassword = HashPassword(password);

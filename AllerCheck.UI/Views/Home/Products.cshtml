@@ -1,7 +1,25 @@
 @model List<AllerCheck.API.DTOs.ProductDTO.ProductDto>
 
 <div class="container mt-4">
-    <h2>Ürünler</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Ürünler</h2>
+        <div>
+            <a asp-action="AddProduct" class="btn btn-primary me-2">
+                <i class="bi bi-plus-circle"></i> Yeni Ürün Ekle
+            </a>
+            <a asp-action="AddCategory" class="btn btn-success">
+                <i class="bi bi-folder-plus"></i> Yeni Kategori Ekle
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <div class="row mb-3">
         <div class="col">
@@ -23,22 +41,79 @@
                         <h5 class="card-title">@product.ProductName</h5>
                         <p class="card-text">
                             <strong>Kategori:</strong> @product.CategoryName<br/>
-                            <strong>Üretici:</strong> @product.ProducerName
+                            <strong>Üretici:</strong> @product.ProducerName<br/>
+                            <small class="text-muted">Ekleyen: @product.AddedByUserName</small>
                         </p>
-                        <button class="btn btn-info btn-sm" data-toggle="collapse" data-target="#contents-@product.Id">
-                            İçerikleri Göster
-                        </button>
+                        <div class="btn-group w-100 mb-2">
+                            <form asp-controller="Account" asp-action="AddToFavorites" method="post" class="me-2">
+                                <input type="hidden" name="productId" value="@product.ProductId" />
+                                <input type="hidden" name="listName" value="Varsayılan Liste" />
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-heart"></i> Favorilere Ekle
+                                </button>
+                            </form>
+                            <button class="btn btn-info btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#contents-@product.Id">
+                                <i class="bi bi-list"></i> İçerikleri Göster
+                            </button>
+                        </div>
                         <div id="contents-@product.Id" class="collapse mt-2">
-                            <ul class="list-group">
+                            <div class="list-group">
                                 @foreach (var content in product.Contents)
                                 {
-                                    <li class="list-group-item">@content.ContentName</li>
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>@content.ContentName</span>
+                                            <form asp-controller="Account" asp-action="AddToBlacklist" method="post" class="ms-2">
+                                                <input type="hidden" name="contentId" value="@content.ContentId" />
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="bi bi-x-circle"></i> Kara Listeye Ekle
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 }
-                            </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-end">
+                            <a asp-controller="Account" asp-action="BlackList" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-x-circle"></i> Kara Listem
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         }
     </div>
-</div> 
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {           
+            $('.btn-info').on('click', function (e) {
+                e.preventDefault();
+                
+                // Tıklanan buton ve hedef içerik
+                var $button = $(this);
+                var targetId = $button.data('bs-target');
+                var $target = $(targetId);
+                
+                // Diğer tüm içerikleri kapat
+                $('.collapse').not(targetId).removeClass('show');
+                
+                // Diğer tüm butonları sıfırla
+                $('.btn-info').not($button).html('<i class="bi bi-list"></i> İçerikleri Göster');
+                
+                // Tıklanan içeriğin durumunu kontrol et
+                if ($target.hasClass('show')) {
+                    $target.removeClass('show');
+                    $button.html('<i class="bi bi-list"></i> İçerikleri Göster');
+                } else {
+                    $target.addClass('show');
+                    $button.html('<i class="bi bi-list-nested"></i> İçerikleri Gizle');
+                }
+            });
+        });
+    </script>
+} 

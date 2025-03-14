@@ -11,7 +11,7 @@ namespace AllerCheck_Core.Entities
         public User()
         {
             BlackLists = new HashSet<BlackList>();
-            FavoriteLists = new HashSet<FavoriteList>();
+            FavoriteLists = new HashSet<FavoriteList>();            
         }
 
         public int UserId { get; set; }
@@ -19,14 +19,14 @@ namespace AllerCheck_Core.Entities
         public string UserSurname { get; set; }
         public string MailAdress { get; set; }
         public string UserPassword { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public bool IsActive { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public int UyelikTipiId { get; set; } = 1; // Varsayılan üyelik tipi
+        public int CreatedBy { get; set; } = 1; // Varsayılan değer
 
+        public virtual UyelikTipi UyelikTipi { get; set; }
         public virtual ICollection<BlackList> BlackLists { get; set; }
         public virtual ICollection<FavoriteList> FavoriteLists { get; set; }
-
         public virtual ICollection<Contact> Contacts { get; set; } = new List<Contact>();
-
         public virtual ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

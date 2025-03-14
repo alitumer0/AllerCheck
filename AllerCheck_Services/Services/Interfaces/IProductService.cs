@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using AllerCheck_Core.Entities;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using AllerCheck.API.DTOs.ProductDTO;
 
 namespace AllerCheck_Services.Services.Interfaces
 {
     public interface IProductService
     {
-        Task<IEnumerable<ProductDto>> GetAllProductsAsync();
-        Task<ProductDto> GetProductByIdAsync(int id);
-        Task<bool> CreateProductAsync(ProductDto productDto);
-        Task<bool> UpdateProductAsync(ProductDto productDto);
-        Task<bool> DeleteProductAsync(int id);
+        Task<IEnumerable<Product>> GetAllProductsWithDetailsAsync();
+        Task<IEnumerable<Product>> SearchProductsAsync(string query);
+        Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId);
+        Task<IEnumerable<Producer>> GetAllProducersAsync();
+        Task<IEnumerable<Content>> GetAllContentsWithRiskStatusAsync();
+        Task<bool> CreateProductWithContentsAsync(Product product, List<int> selectedContents);
     }
 }

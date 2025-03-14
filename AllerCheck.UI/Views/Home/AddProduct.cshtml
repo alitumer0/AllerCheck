@@ -1,0 +1,98 @@
+@model AllerCheck_Core.Entities.Product
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Yeni Ürün Ekle</h5>
+        </div>
+        <div class="card-body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                </div>
+            }
+
+            <form asp-action="AddProduct" method="post">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ProductName" class="form-label">Ürün Adı</label>
+                        <input asp-for="ProductName" class="form-control" />
+                        <span asp-validation-for="ProductName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CategoryId" class="form-label">Kategori</label>
+                        <select asp-for="CategoryId" class="form-select" required>
+                            <option value="">Kategori Seçin</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.CategoryId">@category.CategoryName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ProducerId" class="form-label">Üretici</label>
+                        <select asp-for="ProducerId" class="form-select" required>
+                            <option value="">Üretici Seçin</option>
+                            @foreach (var producer in ViewBag.Producers)
+                            {
+                                <option value="@producer.ProducerId">@producer.ProducerName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="ProducerId" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label class="form-label">İçerikler</label>
+                        <div class="border p-3 rounded">
+                            @foreach (var content in ViewBag.Contents)
+                            {
+                                <div class="form-check">
+                                    <input type="checkbox" 
+                                           name="selectedContents" 
+                                           value="@content.ContentId" 
+                                           class="form-check-input" 
+                                           id="content_@content.ContentId" />
+                                    <label class="form-check-label" for="content_@content.ContentId">
+                                        @content.ContentName 
+                                        <small class="text-muted">(@content.RiskStatus.RiskStatusName)</small>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState["selectedContents"]?.Errors.Count > 0)
+                        {
+                            <span class="text-danger">@ViewData.ModelState["selectedContents"].Errors.First().ErrorMessage</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Ürün Ekle
+                    </button>
+                    <a asp-action="Products" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Geri Dön
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            $('form').on('submit', function (e) {
+                if ($('input[name="selectedContents"]:checked').length === 0) {
+                    e.preventDefault();
+                    alert('Lütfen en az bir içerik seçin.');
+                }
+            });
+        });
+    </script>
+} 

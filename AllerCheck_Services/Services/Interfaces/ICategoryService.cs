@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using AllerCheck_Core.Entities;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using AllerCheck.API.DTOs.CategoryDTO;
 
 namespace AllerCheck_Services.Services.Interfaces
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync();
-        Task<CategoryDto> GetCategoryByIdAsync(int id);
-        Task<bool> CreateCategoryAsync(CategoryDto categoryDto);
-        Task<bool> UpdateCategoryAsync(CategoryDto categoryDto);
-        Task<bool> DeleteCategoryAsync(int id);
+        Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<bool> CreateCategoryAsync(Category category);
     }
 }

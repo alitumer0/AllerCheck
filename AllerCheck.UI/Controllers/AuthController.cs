@@ -6,16 +6,21 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
+using AllerCheck_Data.Context;
+using AllerCheck_Core.Entities;
 
 namespace AllerCheck.UI.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly AllerCheck_Services.Services.Interfaces.IAuthenticationService _authService;
+        private readonly AllerCheckDbContext _context;
 
-        public AuthController(AllerCheck_Services.Services.Interfaces.IAuthenticationService authService)
+        public AuthController(AllerCheckDbContext context)
         {
-            _authService = authService;
+            _context = context;
         }
 
         [HttpGet]
@@ -37,39 +42,49 @@ namespace AllerCheck.UI.Controllers
                 return View(loginDto);
             }
 
-            var (success, message, user) = await _authService.LoginAsync(loginDto);
-            
-            if (success && user != null)
+            // Kullanıcıyı e-posta ile bul
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.MailAdress == loginDto.Email);
+
+            if (user == null)
             {
-                // Session'a kullanıcı bilgilerini kaydet
-                HttpContext.Session.SetString("UserName", user.UserName);
-                HttpContext.Session.SetString("UserEmail", user.MailAdress);
-                HttpContext.Session.SetInt32("UserId", user.Id);
-                HttpContext.Session.SetString("UserData", JsonSerializer.Serialize(user));
-
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.Email, user.MailAdress),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties
-                {
-                    IsPersistent = loginDto.RememberMe
-                };
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    authProperties);
-
-                return RedirectToAction("Index", "Home");
+                ModelState.AddModelError("", "Geçersiz e-posta veya şifre.");
+                return View(loginDto);
             }
 
-            ModelState.AddModelError("", message);
-            return View(loginDto);
+            // Şifre kontrolü (hash'lenmiş)
+            var hashedPassword = HashPassword(loginDto.UserPassword);
+            if (user.UserPassword != hashedPassword)
+            {
+                ModelState.AddModelError("", "Geçersiz e-posta veya şifre.");
+                return View(loginDto);
+            }
+
+            // Session'a kullanıcı bilgilerini kaydet
+            HttpContext.Session.SetString("UserName", user.UserName);
+            HttpContext.Session.SetString("UserEmail", user.MailAdress);
+            HttpContext.Session.SetInt32("UserId", user.UserId);
+            HttpContext.Session.SetString("UserData", JsonSerializer.Serialize(user));
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.MailAdress),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = loginDto.RememberMe
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+            return Redirect("/Home/Index");
         }
 
         [HttpGet]
@@ -86,36 +101,67 @@ namespace AllerCheck.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
+                if (!ModelState.IsValid)
+                {
+                    return View(registerDto);
+                }
+
+                // E-posta kontrolü
+                if (await _context.Users.AnyAsync(u => u.MailAdress == registerDto.MailAdress))
+                {
+                    ModelState.AddModelError("", "Bu e-posta adresi zaten kayıtlı.");
+                    return View(registerDto);
+                }
+
+                // Yeni kullanıcı oluştur
+                var user = new User
+                {
+                    UserName = registerDto.UserName,
+                    UserSurname = registerDto.UserSurname,
+                    MailAdress = registerDto.MailAdress,
+                    UserPassword = HashPassword(registerDto.UserPassword),
+                    CreatedDate = DateTime.Now,
+                    UyelikTipiId = 1,
+                    CreatedBy = 1
+                };
+
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Kayıt başarıyla tamamlandı. Giriş yapabilirsiniz.";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Kayıt işlemi sırasında bir hata oluştu: {ex.Message}");
                 return View(registerDto);
             }
-
-            var (success, message) = await _authService.RegisterAsync(registerDto);
-            
-            if (success)
-            {
-                TempData["SuccessMessage"] = message;
-                return RedirectToAction(nameof(Login));
-            }
-
-            ModelState.AddModelError("", message);
-            return View(registerDto);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpGet]
         public async Task<IActionResult> Logout()
         {
             HttpContext.Session.Clear();
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
+            return Redirect("/Home/Index");
         }
 
         [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        private string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(hashedBytes);
+            }
         }
     }
 }

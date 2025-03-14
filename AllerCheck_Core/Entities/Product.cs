@@ -28,13 +28,13 @@ namespace AllerCheck_Core.Entities
 
         public virtual ICollection<FavoriteListDetail> FavoriteListDetails { get; set; } = new List<FavoriteListDetail>();
 
-        public virtual Category Category { get; set; } = null!;
+        public virtual Category? Category { get; set; }
 
-        public virtual Producer Producer { get; set; } = null!;
+        public virtual Producer? Producer { get; set; }
 
         public virtual ICollection<ContentProduct> ContentProducts { get; set; } = new List<ContentProduct>();
 
-        public virtual User User { get; set; } = null!;
+        public virtual User? User { get; set; }
     }
 
 }

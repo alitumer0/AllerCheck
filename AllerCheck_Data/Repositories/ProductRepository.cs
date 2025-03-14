@@ -12,91 +12,80 @@ namespace AllerCheck_Data.Repositories
 {
     public class ProductRepository : IProductRepository
     {
-        private readonly AllerCheckDbContext _db;
+        private readonly AllerCheckDbContext _context;
 
-        public ProductRepository(AllerCheckDbContext db)
+        public ProductRepository(AllerCheckDbContext context)
         {
-            _db = db;
+            _context = context;
         }
 
-        public async Task<IEnumerable<Product>> GetAllAsync()
+        public async Task<IEnumerable<Product>> GetAllProductsWithDetailsAsync()
         {
-            return await _db.Products.ToListAsync();
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Producer)
+                .Include(p => p.User)
+                .Include(p => p.ContentProducts)
+                    .ThenInclude(cp => cp.Content)
+                        .ThenInclude(c => c.RiskStatus)
+                .ToListAsync();
         }
 
-        public async Task<Product> GetByIdAsync(int id)
+        public async Task<IEnumerable<Product>> SearchProductsAsync(string query)
         {
-            return await _db.Products.FindAsync(id);
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Producer)
+                .Include(p => p.User)
+                .Include(p => p.ContentProducts)
+                    .ThenInclude(cp => cp.Content)
+                        .ThenInclude(c => c.RiskStatus)
+                .Where(p => p.ProductName.Contains(query) ||
+                           p.Category.CategoryName.Contains(query) ||
+                           p.Producer.ProducerName.Contains(query))
+                .ToListAsync();
         }
 
-        public async Task<bool> AddAsync(Product product)
+        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId)
         {
-            bool result = false;
-            using (var transaction = await _db.Database.BeginTransactionAsync())
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Producer)
+                .Include(p => p.User)
+                .Include(p => p.ContentProducts)
+                    .ThenInclude(cp => cp.Content)
+                        .ThenInclude(c => c.RiskStatus)
+                .Where(p => p.CategoryId == categoryId)
+                .ToListAsync();
+        }
+
+        public async Task<bool> CreateProductWithContentsAsync(Product product, List<int> selectedContents)
+        {
+            try
             {
-                try
-                {
-                    await _db.Products.AddAsync(product);
-                    if (await _db.SaveChangesAsync() > 0)
-                    {
-                        await transaction.CommitAsync();
-                        result = true;
-                    }
-                }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
-                }
-            }
-            return result;
-        }
+                await _context.Products.AddAsync(product);
+                await _context.SaveChangesAsync();
 
-        public async Task<bool> UpdateAsync(Product product)
-        {
-            bool result = false;
-            using (var transaction = await _db.Database.BeginTransactionAsync())
-            {
-                try
+                if (selectedContents != null && selectedContents.Any())
                 {
-                    _db.Products.Update(product);
-                    if (await _db.SaveChangesAsync() > 0)
+                    foreach (var contentId in selectedContents)
                     {
-                        await transaction.CommitAsync();
-                        result = true;
-                    }
-                }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
-                }
-            }
-            return result;
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            bool result = false;
-            using (var transaction = await _db.Database.BeginTransactionAsync())
-            {
-                try
-                {
-                    var product = await GetByIdAsync(id);
-                    if (product != null)
-                    {
-                        _db.Products.Remove(product);
-                        if (await _db.SaveChangesAsync() > 0)
+                        var contentProduct = new ContentProduct
                         {
-                            await transaction.CommitAsync();
-                            result = true;
-                        }
+                            ProductId = product.ProductId,
+                            ContentId = contentId
+                        };
+                        await _context.ContentProducts.AddAsync(contentProduct);
                     }
+                    await _context.SaveChangesAsync();
                 }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
-                }
+
+                return true;
             }
-            return result;
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

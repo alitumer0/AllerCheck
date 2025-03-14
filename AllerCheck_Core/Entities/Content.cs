@@ -12,7 +12,7 @@ namespace AllerCheck_Core.Entities
 
         public string ContentName { get; set; } = null!;
 
-        public int RiskStatusId { get; set; }
+        public int RiskStatusId { get; set; } = 1;
 
         public string ContentInfo { get; set; } = null!;
 

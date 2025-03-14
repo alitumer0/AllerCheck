@@ -6,5 +6,6 @@ namespace AllerCheck.API.DTOs.BlackListDTO
         public int UserId { get; set; }
         public int ContentId { get; set; }
         public string ContentName { get; set; }
+        public string RiskStatusName { get; set; } = "Riskli";
     }
 } 

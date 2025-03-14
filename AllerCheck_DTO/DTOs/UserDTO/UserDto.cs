@@ -13,5 +13,6 @@ namespace AllerCheck.API.DTOs.UserDTO
         public string UserPassword { get; set; }
         public List<FavoriteListDto> FavoriteLists { get; set; }
         public List<BlackListDto> BlackLists { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 }

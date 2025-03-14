@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AllerCheck_Core.Entities;
-using AllerCheck.API.DTOs.ProductDTO;
 using AllerCheck_Data.Repositories.Interfaces;
 using AllerCheck_Services.Services.Interfaces;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using AllerCheck_Data.Context;
 
 namespace AllerCheck_Services.Services
 {
@@ -15,41 +16,45 @@ namespace AllerCheck_Services.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
+        private readonly AllerCheckDbContext _context;
 
-        public ProductService(IProductRepository productRepository, IMapper mapper)
+        public ProductService(IProductRepository productRepository, IMapper mapper, AllerCheckDbContext context)
         {
             _productRepository = productRepository;
             _mapper = mapper;
+            _context = context;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
+        public async Task<IEnumerable<Product>> GetAllProductsWithDetailsAsync()
         {
-            var products = await _productRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<ProductDto>>(products);
+            return await _productRepository.GetAllProductsWithDetailsAsync();
         }
 
-        public async Task<ProductDto> GetProductByIdAsync(int id)
+        public async Task<IEnumerable<Product>> SearchProductsAsync(string query)
         {
-            var product = await _productRepository.GetByIdAsync(id);
-            return _mapper.Map<ProductDto>(product);
+            return await _productRepository.SearchProductsAsync(query);
         }
 
-        public async Task<bool> CreateProductAsync(ProductDto productDto)
+        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId)
         {
-            var product = _mapper.Map<Product>(productDto);
-            product.CreatedDate = DateTime.Now;
-            return await _productRepository.AddAsync(product);
+            return await _productRepository.GetProductsByCategoryAsync(categoryId);
         }
 
-        public async Task<bool> UpdateProductAsync(ProductDto productDto)
+        public async Task<IEnumerable<Producer>> GetAllProducersAsync()
         {
-            var product = _mapper.Map<Product>(productDto);
-            return await _productRepository.UpdateAsync(product);
+            return await _context.Producers.ToListAsync();
         }
 
-        public async Task<bool> DeleteProductAsync(int id)
+        public async Task<IEnumerable<Content>> GetAllContentsWithRiskStatusAsync()
         {
-            return await _productRepository.DeleteAsync(id);
+            return await _context.Contents
+                .Include(c => c.RiskStatus)
+                .ToListAsync();
+        }
+
+        public async Task<bool> CreateProductWithContentsAsync(Product product, List<int> selectedContents)
+        {
+            return await _productRepository.CreateProductWithContentsAsync(product, selectedContents);
         }
     }
 }

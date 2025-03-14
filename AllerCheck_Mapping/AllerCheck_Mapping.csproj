@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AllerCheck.API\AllerCheck.API.csproj" />
     <ProjectReference Include="..\AllerCheck_Core\AllerCheck_Core.csproj" />
+    <ProjectReference Include="..\AllerCheck_DTO\AllerCheck_DTO.csproj" />
   </ItemGroup>
 
 </Project>

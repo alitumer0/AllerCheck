@@ -28,35 +28,29 @@ namespace AllerCheck_Data.Repositories
 
         public async Task<User> GetUserByIdWithDetailsAsync(int id)
         {
-            return await _db.Users
+            var result = await _db.Users
                 .Include(u => u.FavoriteLists)
                 .Include(u => u.BlackLists)
-                .FirstOrDefaultAsync(u => u.UserId == id);
+                .SingleOrDefaultAsync(u => u.UserId == id);
+
+            return result ?? throw new Exception($"UserId: {id} olan kullanıcı bulunamadı.");
         }
 
         public async Task<bool> CreateUserWithDetailsAsync(User user, List<FavoriteList> favoriteLists = null, List<BlackList> blackLists = null)
         {
-            bool userReturn = false;
+            if (user.CreatedDate == default(DateTime))
+            {
+                user.CreatedDate = DateTime.Now;
+            }
+
             using (var transaction = await _db.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    
-                    if (string.IsNullOrEmpty(user.UserName) || string.IsNullOrEmpty(user.UserPassword))
-                    {
-                        throw new Exception("Kullanıcı adı ve şifre boş olamaz!");
-                    }
-
-                    
-                    if (_db.Users.Any(u => u.MailAdress == user.MailAdress))
-                    {
-                        throw new Exception("Bu email adresi zaten kayıtlı!");
-                    }
-
-                    
-                    user.CreatedDate = DateTime.Now;
                     await _db.Users.AddAsync(user);
-                    if (await _db.SaveChangesAsync() > 0)
+                    var result = await _db.SaveChangesAsync();
+
+                    if (result > 0)
                     {
                         if (favoriteLists?.Any() == true)
                         {
@@ -78,15 +72,29 @@ namespace AllerCheck_Data.Repositories
 
                         await _db.SaveChangesAsync();
                         await transaction.CommitAsync();
-                        userReturn = true;
+                        return true;
                     }
+
+                    await transaction.RollbackAsync();
+                    return false;
                 }
-                catch (Exception)
+                catch (DbUpdateException dbEx)
                 {
                     await transaction.RollbackAsync();
+                    var innerException = dbEx.InnerException;
+                    while (innerException != null)
+                    {
+                        Console.WriteLine($"Inner Exception: {innerException.Message}");
+                        innerException = innerException.InnerException;
+                    }
+                    throw new Exception($"Veritabanı hatası: {dbEx.InnerException?.Message ?? dbEx.Message}");
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception($"Kullanıcı oluşturulurken bir hata oluştu: {ex.Message}", ex);
                 }
             }
-            return userReturn;
         }
 
         public async Task<bool> UpdateUserWithDetailsAsync(User user, List<FavoriteList> favoriteLists = null, List<BlackList> blackLists = null)
@@ -103,14 +111,18 @@ namespace AllerCheck_Data.Repositories
 
                         if (favoriteLists != null)
                         {
-                            var existingFavorites = await _db.FavoriteLists.Where(f => f.UserId == user.UserId).ToListAsync();
+                            var existingFavorites = await _db.FavoriteLists
+                                .Where(f => f.UserId == user.UserId)
+                                .ToListAsync();
                             _db.FavoriteLists.RemoveRange(existingFavorites);
                             await _db.FavoriteLists.AddRangeAsync(favoriteLists);
                         }
 
                         if (blackLists != null)
                         {
-                            var existingBlacklists = await _db.BlackLists.Where(b => b.UserId == user.UserId).ToListAsync();
+                            var existingBlacklists = await _db.BlackLists
+                                .Where(b => b.UserId == user.UserId)
+                                .ToListAsync();
                             _db.BlackLists.RemoveRange(existingBlacklists);
                             await _db.BlackLists.AddRangeAsync(blackLists);
                         }

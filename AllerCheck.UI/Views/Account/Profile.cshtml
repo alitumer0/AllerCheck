@@ -1,45 +1,79 @@
 @model AllerCheck.API.DTOs.UserDTO.UserDto
 
 <div class="container mt-4">
-    <h2>Profil Bilgileri</h2>
-
-    @if (TempData["SuccessMessage"] != null)
+    @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["SuccessMessage"]
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
     <div class="row">
-        <div class="col-md-6">
-            <form asp-action="UpdateProfile" method="post">
-                <div class="form-group">
-                    <label asp-for="UserName">Kullanıcı Adı</label>
-                    <input asp-for="UserName" class="form-control" />
-                    <span asp-validation-for="UserName" class="text-danger"></span>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person"></i> Profilim
+                    </h5>
+                    <a asp-action="UpdateProfile" class="btn btn-light btn-sm">
+                        <i class="bi bi-pencil"></i> Profili Düzenle
+                    </a>
                 </div>
-
-                <div class="form-group">
-                    <label asp-for="UserSurname">Soyadı</label>
-                    <input asp-for="UserSurname" class="form-control" />
-                    <span asp-validation-for="UserSurname" class="text-danger"></span>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Ad:</strong> @Model.UserName</p>
+                            <p><strong>Soyad:</strong> @Model.UserSurname</p>
+                            <p><strong>E-posta:</strong> @Model.MailAdress</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Üyelik Tarihi:</strong> @Model.CreatedDate.ToShortDateString()</p>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label asp-for="MailAdress">E-posta</label>
-                    <input asp-for="MailAdress" class="form-control" />
-                    <span asp-validation-for="MailAdress" class="text-danger"></span>
-                </div>
-
-                <button type="submit" class="btn btn-primary mt-3">Güncelle</button>
-            </form>
+            </div>
         </div>
     </div>
 
     <div class="row mt-4">
         <div class="col-md-6">
-            <a asp-action="Blacklist" class="btn btn-warning">Kara Listemi Görüntüle</a>
-            <a asp-action="Favorites" class="btn btn-info">Favorilerimi Görüntüle</a>
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-heart"></i> Favori Listelerim
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <a asp-action="FavoriteLists" class="btn btn-outline-success">
+                        <i class="bi bi-list"></i> Favori Listelerimi Görüntüle
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-x-circle"></i> Kara Listem
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <a asp-action="BlackList" class="btn btn-outline-danger">
+                        <i class="bi bi-list"></i> Kara Listemi Görüntüle
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-</div> 
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Alert mesajlarını otomatik kapat
+            $('.alert').delay(4000).fadeOut(350);
+        });
+    </script>
+} 

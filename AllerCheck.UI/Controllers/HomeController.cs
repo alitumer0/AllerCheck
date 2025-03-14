@@ -1,33 +1,166 @@
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using AllerCheck.UI.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using AllerCheck_Data.Context;
+using AllerCheck_Core.Entities;
+using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 using AllerCheck.API.DTOs.ProductDTO;
-using System.Collections.Generic;
-using System.Text.Json;
+using System.Security.Claims;
+using AllerCheck_Services.Services.Interfaces;
 
 namespace AllerCheck.UI.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IProductService _productService;
+        private readonly ICategoryService _categoryService;
         private readonly ILogger<HomeController> _logger;
-        private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
+        public HomeController(
+            IProductService productService,
+            ICategoryService categoryService,
+            ILogger<HomeController> logger,
+            IMapper mapper)
         {
+            _productService = productService;
+            _categoryService = categoryService;
             _logger = logger;
-            _configuration = configuration;
-            _httpClient = new HttpClient
-            {
-                BaseAddress = new Uri(_configuration["ApiSettings:BaseUrl"])
-            };
+            _mapper = mapper;
         }
 
         public IActionResult Index()
         {
             return View();
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Products()
+        {
+            var products = await _productService.GetAllProductsWithDetailsAsync();
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
+            return View(productDtos);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Search(string query)
+        {
+            var products = await _productService.SearchProductsAsync(query);
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
+            return View("Products", productDtos);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Category(int id)
+        {
+            var products = await _productService.GetProductsByCategoryAsync(id);
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
+            return View("Products", productDtos);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> AddProduct()
+        {
+            ViewBag.Categories = await _categoryService.GetAllCategoriesAsync();
+            ViewBag.Producers = await _productService.GetAllProducersAsync();
+            ViewBag.Contents = await _productService.GetAllContentsWithRiskStatusAsync();
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> AddProduct(Product product, List<int> selectedContents)
+        {
+            try
+            {
+                if (product.CategoryId == 0)
+                {
+                    ModelState.AddModelError("CategoryId", "Kategori seçimi zorunludur.");
+                }
+                if (product.ProducerId == 0)
+                {
+                    ModelState.AddModelError("ProducerId", "Üretici seçimi zorunludur.");
+                }
+                if (!ModelState.IsValid)
+                {
+                    ViewBag.Categories = await _categoryService.GetAllCategoriesAsync();
+                    ViewBag.Producers = await _productService.GetAllProducersAsync();
+                    ViewBag.Contents = await _productService.GetAllContentsWithRiskStatusAsync();
+                    return View(product);
+                }
+
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                product.UserId = userId;
+                product.CreatedBy = userId;
+                product.CreatedDate = DateTime.Now;
+
+                if (selectedContents == null || !selectedContents.Any())
+                {
+                    ModelState.AddModelError("", "En az bir içerik seçmelisiniz.");
+                    ViewBag.Categories = await _categoryService.GetAllCategoriesAsync();
+                    ViewBag.Producers = await _productService.GetAllProducersAsync();
+                    ViewBag.Contents = await _productService.GetAllContentsWithRiskStatusAsync();
+                    return View(product);
+                }
+
+                var result = await _productService.CreateProductWithContentsAsync(product, selectedContents);
+                
+                if (result)
+                {
+                    TempData["Success"] = "Ürün başarıyla eklendi.";
+                    return RedirectToAction(nameof(Products));
+                }
+                
+                ModelState.AddModelError("", "Ürün eklenirken bir hata oluştu.");
+                ViewBag.Categories = await _categoryService.GetAllCategoriesAsync();
+                ViewBag.Producers = await _productService.GetAllProducersAsync();
+                ViewBag.Contents = await _productService.GetAllContentsWithRiskStatusAsync();
+                return View(product);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Bir hata oluştu: {ex.Message}");
+                ViewBag.Categories = await _categoryService.GetAllCategoriesAsync();
+                ViewBag.Producers = await _productService.GetAllProducersAsync();
+                ViewBag.Contents = await _productService.GetAllContentsWithRiskStatusAsync();
+                return View(product);
+            }
+        }
+
+        [Authorize]
+        public async Task<IActionResult> AddCategory()
+        {
+            ViewBag.TopCategories = await _categoryService.GetAllCategoriesAsync();
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> AddCategory(Category category)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var result = await _categoryService.CreateCategoryAsync(category);
+                    if (result)
+                    {
+                        TempData["Success"] = "Kategori başarıyla eklendi.";
+                        return RedirectToAction(nameof(Products));
+                    }
+                    
+                    ModelState.AddModelError("", "Kategori eklenirken bir hata oluştu.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Bir hata oluştu: {ex.Message}");
+            }
+            
+            ViewBag.TopCategories = await _categoryService.GetAllCategoriesAsync();
+            return View(category);
         }
 
         public IActionResult Privacy()
@@ -39,42 +172,6 @@ namespace AllerCheck.UI.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
-        public async Task<IActionResult> Products()
-        {
-            var response = await _httpClient.GetAsync("api/product");
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                var products = JsonSerializer.Deserialize<List<ProductDto>>(content);
-                return View(products);
-            }
-            return View(new List<ProductDto>());
-        }
-
-        public async Task<IActionResult> Search(string query)
-        {
-            var response = await _httpClient.GetAsync($"api/product/search?query={query}");
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                var products = JsonSerializer.Deserialize<List<ProductDto>>(content);
-                return View("Products", products);
-            }
-            return View("Products", new List<ProductDto>());
-        }
-
-        public async Task<IActionResult> Category(int id)
-        {
-            var response = await _httpClient.GetAsync($"api/category/{id}/products");
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                var products = JsonSerializer.Deserialize<List<ProductDto>>(content);
-                return View("Products", products);
-            }
-            return View("Products", new List<ProductDto>());
         }
     }
 }

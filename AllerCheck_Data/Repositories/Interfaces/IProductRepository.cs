@@ -6,10 +6,9 @@ namespace AllerCheck_Data.Repositories.Interfaces
 {
     public interface IProductRepository
     {
-        Task<IEnumerable<Product>> GetAllAsync();
-        Task<Product> GetByIdAsync(int id);
-        Task<bool> AddAsync(Product product);
-        Task<bool> UpdateAsync(Product product);
-        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<Product>> GetAllProductsWithDetailsAsync();
+        Task<IEnumerable<Product>> SearchProductsAsync(string query);
+        Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId);
+        Task<bool> CreateProductWithContentsAsync(Product product, List<int> selectedContents);
     }
 }
