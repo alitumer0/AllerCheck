@@ -33,6 +33,8 @@ namespace AllerCheck.UI.Controllers
 
         public IActionResult Index()
         {
+            bool isLoggedIn = User.Identity.IsAuthenticated;
+            ViewBag.IsLoggedIn = isLoggedIn; //Todo: Index ve Layout'a değişkeni gönder. IsLoggedIn Değişkenlerini ekle.
             return View();
         }
 

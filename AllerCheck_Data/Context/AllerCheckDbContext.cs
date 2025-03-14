@@ -124,7 +124,7 @@ namespace AllerCheck_Data.Context
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.BlackLists)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
+                    .OnDelete(DeleteBehavior.ClientSetNull); //Todo: Database'in ismini değiştir. Database tarafında Database'i Rename  yapılacak. Rename yapıldıktan sonra Appsettings.json'da connection string değiştirilecek.
             });
 
             modelBuilder.Entity<FavoriteList>(entity =>

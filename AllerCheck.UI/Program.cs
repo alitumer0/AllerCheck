@@ -55,7 +55,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseHsts(); //Todo: Hsts nedir ? bunu araştır chatgptden buldun.
 }
 
 app.UseHttpsRedirection();

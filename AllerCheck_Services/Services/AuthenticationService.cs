@@ -14,7 +14,7 @@ using AllerCheck_Data.Context;
 
 namespace AllerCheck_Services.Services
 {
-    public class AuthenticationService : IAuthenticationService
+    public class AuthenticationService : IAuthenticationService //Burası için bir Repo GEREKLİ mi ? Bunu bir kontrol et.
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;

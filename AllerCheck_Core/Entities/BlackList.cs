@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AllerCheck_Core.Entities
 {
-    public class BlackList
+    public class BlackList //Todo: Buna da bir bak.Çünkü Blacklist Member gibi kullanılmış.
     {
         public int BlackListId { get; set; }
 

@@ -14,8 +14,8 @@ namespace AllerCheck.UI.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        private readonly AllerCheckDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
 
         public AccountController(AllerCheckDbContext context, IMapper mapper)
         {
@@ -23,7 +23,7 @@ namespace AllerCheck.UI.Controllers
             _mapper = mapper;
         }
 
-        public async Task<IActionResult> Profile()
+        public async Task<IActionResult> Profile()  //  Todo: Her profilin kendine ait bir view'i olacak. Bu view'de kullanıcı bilgileri ve güncelleme işlemleri yapılacak. 
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var user = await _context.Users
@@ -34,7 +34,9 @@ namespace AllerCheck.UI.Controllers
 
             if (user == null)
             {
-                return NotFound();
+                var content = await response.Content.ReadAsStringAsync();
+                var user = JsonSerializer.Deserialize<UserDto>(content);
+                return View(user);
             }
 
             var userDto = _mapper.Map<UserDto>(user);
@@ -216,9 +218,8 @@ namespace AllerCheck.UI.Controllers
             {
                 return NotFound();
             }
-
-            var userDto = _mapper.Map<UserDto>(user);
-            return View(userDto);
+            
+            return Json(new { success = false, message = "İçerik kaldırılırken bir hata oluştu." });
         }
 
         [HttpPost]
