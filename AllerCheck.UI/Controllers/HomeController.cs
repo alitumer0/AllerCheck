@@ -296,19 +296,19 @@ namespace AllerCheck.UI.Controllers
         [Authorize]
         public async Task<IActionResult> ManageContents()
         {
-            var contents = _contentService.GetAllContents();
+            var contents = await _contentService.GetAllContentsAsync();
             ViewBag.Categories = await _categoryService.GetAllCategoriesAsync();
             return View(_mapper.Map<List<ContentDto>>(contents));
         }
 
         [Authorize]
         [HttpPost]
-        public IActionResult AddContent(Content content)
+        public async Task<IActionResult> AddContent(Content content)
         {
             try
             {
                 content.ContentInfo = content.ContentInfo ?? "Kullanıcı tarafından eklendi";
-                _contentService.AddContent(content);
+                await _contentService.AddContentAsync(content);
                 TempData["Success"] = "İçerik başarıyla eklendi.";
                 return RedirectToAction("ManageContents");
             }

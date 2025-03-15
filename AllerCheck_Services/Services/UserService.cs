@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AllerCheck.API.DTOs.UserDTO;
 using AllerCheck_Core.Entities;
@@ -24,10 +25,9 @@ namespace AllerCheck_Services.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        public async Task<User> GetUserByIdWithDetailsAsync(int userId)
         {
-            var users = await _userRepository.GetAllActiveUsersAsync();
-            return _mapper.Map<IEnumerable<UserDto>>(users);
+            return await _userRepository.GetUserByIdWithDetailsAsync(userId);
         }
 
         public async Task<User> GetUserByIdAsync(int id)
@@ -35,115 +35,94 @@ namespace AllerCheck_Services.Services
             return await _userRepository.GetUserByIdWithDetailsAsync(id);
         }
 
-        public async Task<UserDto> GetUserByEmailAsync(string email)
-        {
-            var user = await _userRepository.GetUserByEmailAsync(email);
-            return _mapper.Map<UserDto>(user);
-        }
-
-        public async Task<bool> CheckUserExistsAsync(string email)
-        {
-            return await _userRepository.CheckUserExistsAsync(email);
-        }
-
-        public async Task<bool> CreateUserAsync(UserDto userDto)
-        {
-            var user = _mapper.Map<User>(userDto);
-            user.CreatedDate = DateTime.Now;
-            return await _userRepository.CreateUserWithDetailsAsync(user);
-        }
-
-        public async Task<bool> UpdateUserAsync(UserDto userDto)
-        {
-            var user = _mapper.Map<User>(userDto);
-            return await _userRepository.UpdateUserWithDetailsAsync(user);
-        }
-
-        public async Task<bool> DeleteUserAsync(int id)
-        {
-            return await _userRepository.DeleteUserAndRelatedDataAsync(id);
-        }
-
-        public async Task<User> GetUserByIdWithDetailsAsync(int userId)
-        {
-            return await _userRepository.GetUserByIdWithDetailsAsync(userId);
-        }
-
         public async Task<IEnumerable<FavoriteList>> GetUserFavoriteListsAsync(int userId)
         {
             var user = await _userRepository.GetUserByIdWithDetailsAsync(userId);
-            return user?.FavoriteLists ?? new List<FavoriteList>();
+            return user.FavoriteLists;
         }
 
         public async Task<IEnumerable<BlackList>> GetUserBlackListAsync(int userId)
         {
             var user = await _userRepository.GetUserByIdWithDetailsAsync(userId);
-            return user?.BlackLists ?? new List<BlackList>();
+            return user.BlackLists;
         }
 
         public async Task<bool> AddToFavoritesAsync(int userId, int productId, string listName)
         {
-            try
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                var user = await _userRepository.GetUserByIdWithDetailsAsync(userId);
-                if (user == null) return false;
-
-                var favoriteList = user.FavoriteLists.FirstOrDefault(fl => fl.ListName == listName);
-                if (favoriteList == null)
+                try
                 {
-                    favoriteList = new FavoriteList
+                    var user = await _context.Users
+                        .Include(u => u.FavoriteLists)
+                            .ThenInclude(fl => fl.FavoriteListDetails)
+                        .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                    if (user == null)
+                        return false;
+
+                    var favoriteList = user.FavoriteLists.FirstOrDefault(fl => fl.ListName == listName);
+                    if (favoriteList == null)
                     {
-                        UserId = userId,
-                        ListName = listName,
-                        FavoriteListDetails = new List<FavoriteListDetail>()
-                    };
-                    user.FavoriteLists.Add(favoriteList);
-                }
+                        favoriteList = new FavoriteList { UserId = userId, ListName = listName };
+                        await _context.FavoriteLists.AddAsync(favoriteList);
+                        await _context.SaveChangesAsync();
+                    }
 
-                if (favoriteList.FavoriteListDetails.Any(fld => fld.ProductId == productId))
+                    var existingDetail = favoriteList.FavoriteListDetails
+                        .FirstOrDefault(fld => fld.ProductId == productId);
+
+                    if (existingDetail == null)
+                    {
+                        var detail = new FavoriteListDetail
+                        {
+                            FavoriteListId = favoriteList.FavoriteListId,
+                            ProductId = productId
+                        };
+                        await _context.FavoriteListDetails.AddAsync(detail);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    await transaction.CommitAsync();
+                    return true;
+                }
+                catch (Exception)
                 {
+                    await transaction.RollbackAsync();
                     return false;
                 }
-
-                var favoriteListDetail = new FavoriteListDetail
-                {
-                    ProductId = productId,
-                    FavoriteList = favoriteList
-                };
-                favoriteList.FavoriteListDetails.Add(favoriteListDetail);
-
-                return await _userRepository.UpdateUserWithDetailsAsync(user);
-            }
-            catch (Exception)
-            {
-                return false;
             }
         }
 
         public async Task<bool> AddToBlackListAsync(int userId, int contentId)
         {
-            try
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                var user = await _userRepository.GetUserByIdWithDetailsAsync(userId);
-                if (user == null) return false;
-
-                if (user.BlackLists.Any(bl => bl.ContentId == contentId))
+                try
                 {
+                    var existingBlackList = await _context.BlackLists
+                        .FirstOrDefaultAsync(bl => bl.UserId == userId && bl.ContentId == contentId);
+
+                    if (existingBlackList != null)
+                        return false;
+
+                    var blackList = new BlackList
+                    {
+                        UserId = userId,
+                        ContentId = contentId
+                    };
+
+                    await _context.BlackLists.AddAsync(blackList);
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                    return true;
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
                     return false;
                 }
-
-                var blackList = new BlackList
-                {
-                    UserId = userId,
-                    ContentId = contentId
-                };
-                user.BlackLists.Add(blackList);
-
-                return await _userRepository.UpdateUserWithDetailsAsync(user);
-            }
-            catch (Exception)
-            {
-                return false;
             }
         }
 
@@ -154,16 +133,31 @@ namespace AllerCheck_Services.Services
                 try
                 {
                     var favoriteListDetail = await _context.FavoriteListDetails
-                        .Include(f => f.FavoriteList)
-                        .FirstOrDefaultAsync(f => f.FavoriteListDetailId == favoriteListDetailId && f.FavoriteList.UserId == userId);
+                        .Include(fld => fld.FavoriteList)
+                        .FirstOrDefaultAsync(fld => fld.FavoriteListDetailId == favoriteListDetailId &&
+                                                  fld.FavoriteList.UserId == userId);
 
                     if (favoriteListDetail == null)
-                    {
                         return false;
-                    }
 
                     _context.FavoriteListDetails.Remove(favoriteListDetail);
                     await _context.SaveChangesAsync();
+
+                    // Eğer liste boşsa, listeyi de sil
+                    var remainingDetails = await _context.FavoriteListDetails
+                        .AnyAsync(fld => fld.FavoriteListId == favoriteListDetail.FavoriteListId);
+
+                    if (!remainingDetails)
+                    {
+                        var emptyList = await _context.FavoriteLists
+                            .FirstOrDefaultAsync(fl => fl.FavoriteListId == favoriteListDetail.FavoriteListId);
+                        if (emptyList != null)
+                        {
+                            _context.FavoriteLists.Remove(emptyList);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+
                     await transaction.CommitAsync();
                     return true;
                 }
@@ -185,12 +179,11 @@ namespace AllerCheck_Services.Services
                         .FirstOrDefaultAsync(bl => bl.BlackListId == blackListId && bl.UserId == userId);
 
                     if (blackList == null)
-                    {
                         return false;
-                    }
 
                     _context.BlackLists.Remove(blackList);
                     await _context.SaveChangesAsync();
+
                     await transaction.CommitAsync();
                     return true;
                 }
@@ -207,7 +200,8 @@ namespace AllerCheck_Services.Services
             try
             {
                 var user = await _userRepository.GetUserByIdWithDetailsAsync(userId);
-                if (user == null) return false;
+                if (user == null)
+                    return false;
 
                 user.UserName = userDto.UserName;
                 user.UserSurname = userDto.UserSurname;

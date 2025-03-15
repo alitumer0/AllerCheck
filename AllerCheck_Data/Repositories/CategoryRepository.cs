@@ -96,7 +96,7 @@ namespace AllerCheck_Data.Repositories
                     await transaction.RollbackAsync();
                 }
             }
-            return result; //Todo: Kategoriye bağlı ürünler varsa silme işlemi gerçekleştirilemez. Bu durumda bir hata döndürülmeli.Burada bir hata oluşursa geri alınan işlemler geri alınmalı.TransAction kullanımı doğru mu kontrol et.
+            return result; 
         }
     }
 }
