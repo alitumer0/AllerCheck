@@ -30,7 +30,22 @@ namespace AllerCheck_Data.Repositories
         {
             var result = await _db.Users
                 .Include(u => u.FavoriteLists)
+                    .ThenInclude(fl => fl.FavoriteListDetails)
+                        .ThenInclude(fld => fld.Product)
+                            .ThenInclude(p => p.Category)
+                .Include(u => u.FavoriteLists)
+                    .ThenInclude(fl => fl.FavoriteListDetails)
+                        .ThenInclude(fld => fld.Product)
+                            .ThenInclude(p => p.Producer)
+                .Include(u => u.FavoriteLists)
+                    .ThenInclude(fl => fl.FavoriteListDetails)
+                        .ThenInclude(fld => fld.Product)
+                            .ThenInclude(p => p.ContentProducts)
+                                .ThenInclude(cp => cp.Content)
+                                    .ThenInclude(c => c.RiskStatus)
                 .Include(u => u.BlackLists)
+                    .ThenInclude(bl => bl.Content)
+                        .ThenInclude(c => c.RiskStatus)
                 .SingleOrDefaultAsync(u => u.UserId == id);
 
             return result ?? throw new Exception($"UserId: {id} olan kullanıcı bulunamadı.");

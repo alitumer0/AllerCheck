@@ -29,6 +29,9 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddScoped<IContentRepository, ContentRepository>();
+
 
 
 // Authentication ayarları
@@ -55,7 +58,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts(); //Todo: Hsts nedir ? bunu araştır chatgptden buldun.
+    app.UseHsts(); 
 }
 
 app.UseHttpsRedirection();
@@ -71,5 +74,16 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// API yönlendirmesini engelle
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api"))
+    {
+        context.Response.Redirect("/Home/Index");
+        return;
+    }
+    await next();
+});
 
 app.Run();

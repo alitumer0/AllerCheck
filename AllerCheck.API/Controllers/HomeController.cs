@@ -9,7 +9,7 @@ namespace AllerCheck.API.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return Ok(new { message = "AllerCheck API'ye Hoş Geldiniz!" }); //Todo: API İşlemlerini yapacaksın.
+            return Ok(new { message = "AllerCheck API'ye Hoş Geldiniz!" }); 
         }
     }
 } 

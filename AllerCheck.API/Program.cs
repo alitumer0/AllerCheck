@@ -22,11 +22,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Todo: Varsayılan route'u Home controller'a yönlendir.
+
 app.MapControllerRoute(
     name: "default",
     pattern: "api/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
 
-//Todo: API tarafını yapıp yapmamakta kararsızım. buraya bir bak..
+

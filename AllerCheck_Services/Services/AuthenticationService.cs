@@ -14,7 +14,7 @@ using AllerCheck_Data.Context;
 
 namespace AllerCheck_Services.Services
 {
-    public class AuthenticationService : IAuthenticationService //Burası için bir Repo GEREKLİ mi ? Bunu bir kontrol et.
+    public class AuthenticationService : IAuthenticationService
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
@@ -34,14 +34,12 @@ namespace AllerCheck_Services.Services
         {
             try
             {
-                // E-posta ile kullanıcıyı bul
                 var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
                 if (user == null)
                 {
                     return (false, "Geçersiz e-posta veya şifre.", null);
                 }
 
-                // Şifre kontrolü
                 var hashedPassword = HashPassword(loginDto.UserPassword);
                 if (user.UserPassword != hashedPassword)
                 {
@@ -53,8 +51,7 @@ namespace AllerCheck_Services.Services
             }
             catch (Exception ex)
             {
-                // Loglama yapılabilir
-                return (false, "Giriş işlemi sırasında bir hata oluştu.", null);
+                return (false, $"Giriş işlemi sırasında bir hata oluştu: {ex.Message}", null);
             }
         }
 
@@ -62,32 +59,23 @@ namespace AllerCheck_Services.Services
         {
             try
             {
-                // Kullanıcı adı veya email kontrolü
-                if (await _userRepository.CheckUserExistsAsync(registerDto.MailAdress))
+                if (await CheckUserExistsAsync(registerDto.MailAdress))
                 {
                     return (false, "Bu e-posta adresi zaten kayıtlı.");
                 }
 
-                // Şifre hash'leme
                 var hashedPassword = HashPassword(registerDto.UserPassword);
-
-                // AutoMapper ile dönüşüm
                 var user = _mapper.Map<User>(registerDto);
                 user.UserPassword = hashedPassword;
                 user.CreatedDate = DateTime.Now;
 
                 var result = await _userRepository.CreateUserWithDetailsAsync(user);
-
-                if (result)
-                {
-                    return (true, "Kayıt başarıyla tamamlandı.");
-                }
-                
-                return (false, "Kayıt işlemi sırasında bir hata oluştu.");
+                return result 
+                    ? (true, "Kayıt başarıyla tamamlandı.") 
+                    : (false, "Kayıt işlemi sırasında bir hata oluştu.");
             }
             catch (Exception ex)
             {
-                // Loglama yapılabilir
                 return (false, $"Kayıt işlemi sırasında bir hata oluştu: {ex.Message}");
             }
         }
@@ -101,13 +89,18 @@ namespace AllerCheck_Services.Services
             return user.UserPassword == hashedPassword;
         }
 
-        public async Task<UserDto> GetUserByUsernameAsync(string username)
+        public async Task<UserDto> GetUserByEmailAsync(string email)
         {
-            var user = await _userRepository.GetUserByEmailAsync(username);
+            var user = await _userRepository.GetUserByEmailAsync(email);
             return _mapper.Map<UserDto>(user);
         }
 
-        private string HashPassword(string password)
+        public async Task<bool> CheckUserExistsAsync(string email)
+        {
+            return await _userRepository.CheckUserExistsAsync(email);
+        }
+
+        private static string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
             {

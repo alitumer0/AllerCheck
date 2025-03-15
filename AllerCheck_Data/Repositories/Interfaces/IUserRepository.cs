@@ -11,10 +11,10 @@ namespace AllerCheck_Data.Repositories.Interfaces
     {
         Task<IEnumerable<User>> GetAllActiveUsersAsync();
         Task<User> GetUserByIdWithDetailsAsync(int id);
-        Task<User> GetUserByEmailAsync(string email);
-        Task<bool> CheckUserExistsAsync(string email);
         Task<bool> CreateUserWithDetailsAsync(User user, List<FavoriteList> favoriteLists = null, List<BlackList> blackLists = null);
         Task<bool> UpdateUserWithDetailsAsync(User user, List<FavoriteList> favoriteLists = null, List<BlackList> blackLists = null);
         Task<bool> DeleteUserAndRelatedDataAsync(int id);
+        Task<User> GetUserByEmailAsync(string email);
+        Task<bool> CheckUserExistsAsync(string email);
     }
 }

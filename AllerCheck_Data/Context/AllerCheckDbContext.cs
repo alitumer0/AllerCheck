@@ -68,8 +68,7 @@ namespace AllerCheck_Data.Context
                 entity.Property(e => e.ContentName).HasColumnName("IcerikAdi");
                 entity.Property(e => e.ContentInfo).HasColumnName("IcerikBilgi");
                 entity.Property(e => e.RiskStatusId)
-                    .HasColumnName("RiskDurumId")
-                    .HasDefaultValue(1);
+                    .HasColumnName("RiskDurumId");
 
                 entity.HasOne(d => d.RiskStatus)
                     .WithMany(p => p.Contents)
@@ -88,7 +87,7 @@ namespace AllerCheck_Data.Context
                 entity.HasOne(d => d.Content)
                     .WithMany(p => p.ContentProducts)
                     .HasForeignKey(d => d.ContentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.Product)
                     .WithMany(p => p.ContentProducts)
@@ -119,12 +118,12 @@ namespace AllerCheck_Data.Context
                 entity.HasOne(d => d.Content)
                     .WithMany(p => p.BlackLists)
                     .HasForeignKey(d => d.ContentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.BlackLists)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull); //Todo: Database'in ismini değiştir. Database tarafında Database'i Rename  yapılacak. Rename yapıldıktan sonra Appsettings.json'da connection string değiştirilecek.
+                    .OnDelete(DeleteBehavior.ClientSetNull);
             });
 
             modelBuilder.Entity<FavoriteList>(entity =>

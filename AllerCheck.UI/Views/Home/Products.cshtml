@@ -4,6 +4,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Ürünler</h2>
         <div>
+            <a asp-controller="Home" asp-action="ManageContents" class="btn btn-info me-2">
+                <i class="bi bi-gear"></i> İçerikleri Düzenle
+            </a>
             <a asp-action="AddProduct" class="btn btn-primary me-2">
                 <i class="bi bi-plus-circle"></i> Yeni Ürün Ekle
             </a>
@@ -36,50 +39,114 @@
         @foreach (var product in Model)
         {
             <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">@product.ProductName</h5>
-                        <p class="card-text">
-                            <strong>Kategori:</strong> @product.CategoryName<br/>
-                            <strong>Üretici:</strong> @product.ProducerName<br/>
-                            <small class="text-muted">Ekleyen: @product.AddedByUserName</small>
-                        </p>
-                        <div class="btn-group w-100 mb-2">
-                            <form asp-controller="Account" asp-action="AddToFavorites" method="post" class="me-2">
-                                <input type="hidden" name="productId" value="@product.ProductId" />
-                                <input type="hidden" name="listName" value="Varsayılan Liste" />
-                                <button type="submit" class="btn btn-success btn-sm">
-                                    <i class="bi bi-heart"></i> Favorilere Ekle
-                                </button>
-                            </form>
-                            <button class="btn btn-info btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#contents-@product.Id">
-                                <i class="bi bi-list"></i> İçerikleri Göster
-                            </button>
-                        </div>
-                        <div id="contents-@product.Id" class="collapse mt-2">
-                            <div class="list-group">
-                                @foreach (var content in product.Contents)
-                                {
-                                    <div class="list-group-item">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>@content.ContentName</span>
-                                            <form asp-controller="Account" asp-action="AddToBlacklist" method="post" class="ms-2">
-                                                <input type="hidden" name="contentId" value="@content.ContentId" />
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="bi bi-x-circle"></i> Kara Listeye Ekle
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
+                <div class="card h-100">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">@product.ProductName</h5>
+                        <div class="btn-group">
+                            <a asp-action="EditProduct" asp-route-id="@product.ProductId" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-pencil"></i>
+                            </a>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <div class="d-flex justify-content-end">
-                            <a asp-controller="Account" asp-action="BlackList" class="btn btn-outline-danger btn-sm">
-                                <i class="bi bi-x-circle"></i> Kara Listem
-                            </a>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="bi bi-tag"></i> @product.CategoryName</span>
+                                <span><i class="bi bi-building"></i> @product.ProducerName</span>
+                            </div>
+                            <small class="text-muted">Ekleyen: @product.AddedByUserName</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-info btn-sm flex-grow-1 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#contents-@product.Id">
+                                    <i class="bi bi-list"></i> İçerikler
+                                </button>
+                                <form asp-controller="Account" asp-action="AddToFavorites" method="post">
+                                    <input type="hidden" name="productId" value="@product.ProductId" />
+                                    <input type="hidden" name="listName" value="Favori Listem" />
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-heart"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="contents-@product.Id" class="collapse">
+                            @{
+                                var yuksekRiskliIcerikler = product.Contents.Where(c => c.RiskStatusName == "Yüksek Risk");
+                                var ortaRiskliIcerikler = product.Contents.Where(c => c.RiskStatusName == "Orta Risk");
+                                var dusukRiskliIcerikler = product.Contents.Where(c => c.RiskStatusName == "Düşük Risk");
+                            }
+
+                            @if (yuksekRiskliIcerikler.Any())
+                            {
+                                <div class="mb-2">
+                                    <h6 class="text-danger"><i class="bi bi-exclamation-triangle"></i> Yüksek Riskli İçerikler</h6>
+                                    <div class="list-group">
+                                        @foreach (var content in yuksekRiskliIcerikler)
+                                        {
+                                            <div class="list-group-item list-group-item-danger p-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small>@content.ContentName</small>
+                                                    <form asp-controller="Account" asp-action="AddToBlacklist" method="post" class="ms-2">
+                                                        <input type="hidden" name="contentId" value="@content.ContentId" />
+                                                        <button type="submit" class="btn btn-danger btn-sm">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            @if (ortaRiskliIcerikler.Any())
+                            {
+                                <div class="mb-2">
+                                    <h6 class="text-warning"><i class="bi bi-exclamation-circle"></i> Orta Riskli İçerikler</h6>
+                                    <div class="list-group">
+                                        @foreach (var content in ortaRiskliIcerikler)
+                                        {
+                                            <div class="list-group-item list-group-item-warning p-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small>@content.ContentName</small>
+                                                    <form asp-controller="Account" asp-action="AddToBlacklist" method="post" class="ms-2">
+                                                        <input type="hidden" name="contentId" value="@content.ContentId" />
+                                                        <button type="submit" class="btn btn-warning btn-sm">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            @if (dusukRiskliIcerikler.Any())
+                            {
+                                <div class="mb-2">
+                                    <h6 class="text-success"><i class="bi bi-check-circle"></i> Düşük Riskli İçerikler</h6>
+                                    <div class="list-group">
+                                        @foreach (var content in dusukRiskliIcerikler)
+                                        {
+                                            <div class="list-group-item list-group-item-success p-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small>@content.ContentName</small>
+                                                    <form asp-controller="Account" asp-action="AddToBlacklist" method="post" class="ms-2">
+                                                        <input type="hidden" name="contentId" value="@content.ContentId" />
+                                                        <button type="submit" class="btn btn-success btn-sm">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -91,29 +158,31 @@
 @section Scripts {
     <script>
         $(document).ready(function () {           
-            $('.btn-info').on('click', function (e) {
+            // Sadece ürün içeriklerini gösteren butonlar için event handler
+            $('.btn-info[data-bs-toggle="collapse"]').on('click', function (e) {
                 e.preventDefault();
                 
-                // Tıklanan buton ve hedef içerik
+                // Tıklanan buton
                 var $button = $(this);
                 var targetId = $button.data('bs-target');
-                var $target = $(targetId);
                 
-                // Diğer tüm içerikleri kapat
-                $('.collapse').not(targetId).removeClass('show');
-                
-                // Diğer tüm butonları sıfırla
-                $('.btn-info').not($button).html('<i class="bi bi-list"></i> İçerikleri Göster');
+                // Diğer tüm açık içerikleri kapat
+                $('.collapse').not(targetId).collapse('hide');
+                $('.btn-info[data-bs-toggle="collapse"]').not($button).html('<i class="bi bi-list"></i> İçerikler');
                 
                 // Tıklanan içeriğin durumunu kontrol et
+                var $target = $(targetId);
                 if ($target.hasClass('show')) {
-                    $target.removeClass('show');
-                    $button.html('<i class="bi bi-list"></i> İçerikleri Göster');
+                    $target.collapse('hide');
+                    $button.html('<i class="bi bi-list"></i> İçerikler');
                 } else {
-                    $target.addClass('show');
+                    $target.collapse('show');
                     $button.html('<i class="bi bi-list-nested"></i> İçerikleri Gizle');
                 }
             });
+
+            // Alert mesajlarını otomatik kapat
+            $('.alert').delay(4000).fadeOut(350);
         });
     </script>
 } 

@@ -1,0 +1,228 @@
+@model List<AllerCheck.API.DTOs.ContentDTO.ContentDto>
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0">
+                <i class="bi bi-gear-fill me-2"></i> İçerik Yönetimi
+            </h5>
+            <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addContentModal">
+                <i class="bi bi-plus-circle-fill me-1"></i> Yeni İçerik Ekle
+            </button>
+        </div>
+        <div class="card-body">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <pre class="mb-0" style="white-space: pre-wrap;">@TempData["Error"]</pre>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 25%">İçerik Adı</th>
+                            <th style="width: 15%">Risk Durumu</th>
+                            <th style="width: 35%">Açıklama</th>
+                            <th style="width: 25%" class="text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-4">
+                                    <i class="bi bi-inbox-fill text-muted" style="font-size: 2rem;"></i>
+                                    <p class="text-muted mt-2 mb-0">Henüz içerik bulunmamaktadır.</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var content in Model)
+                            {
+                                <tr>
+                                    <td class="fw-medium">@content.ContentName</td>
+                                    <td>
+                                        <span class="badge rounded-pill @(content.RiskStatusName == "Yüksek Risk" ? "bg-danger" : 
+                                                           content.RiskStatusName == "Orta Risk" ? "bg-warning" : "bg-success")">
+                                            <i class="bi bi-exclamation-circle me-1"></i>
+                                            @content.RiskStatusName
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@content.ContentInfo</small>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                    data-id="@content.ContentId"
+                                                    data-name="@content.ContentName"
+                                                    data-risk="@content.RiskStatusId"
+                                                    data-info="@content.ContentInfo"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#editContentModal">
+                                                <i class="bi bi-pencil-fill me-1"></i> Düzenle
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    data-id="@content.ContentId"
+                                                    data-name="@content.ContentName">
+                                                <i class="bi bi-trash-fill me-1"></i> Sil
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yeni İçerik Ekleme Modal -->
+<div class="modal fade" id="addContentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni İçerik Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="AddContent" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">İçerik Adı</label>
+                        <input type="text" name="ContentName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kategori</label>
+                        <select name="CategoryId" class="form-select" required>
+                            <option value="">Kategori Seçin</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.CategoryId">@category.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Risk Durumu</label>
+                        <select name="RiskStatusId" class="form-select" required>
+                            <option value="">Risk Durumu Seçin</option>
+                            <option value="1">Düşük Risk</option>
+                            <option value="2">Orta Risk</option>
+                            <option value="3">Yüksek Risk</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea name="ContentInfo" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- İçerik Düzenleme Modal -->
+<div class="modal fade" id="editContentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="EditContent" method="post">
+                <input type="hidden" name="ContentId" id="editContentId" />
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-fill me-2"></i>
+                        İçerik Düzenle
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-type me-1"></i>
+                            İçerik Adı
+                        </label>
+                        <input type="text" name="ContentName" id="editContentName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-shield-fill me-1"></i>
+                            Risk Durumu
+                        </label>
+                        <select name="RiskStatusId" id="editRiskStatus" class="form-select" required>
+                            <option value="">Risk durumu seçin...</option>
+                            <option value="1">Düşük Risk</option>
+                            <option value="2">Orta Risk</option>
+                            <option value="3">Yüksek Risk</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-card-text me-1"></i>
+                            Açıklama
+                        </label>
+                        <textarea name="ContentInfo" id="editContentInfo" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>
+                        İptal
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Alert mesajlarını otomatik kapat
+            $('.alert').delay(4000).fadeOut(350);
+
+            // Düzenleme modalını doldur
+            $('.btn-outline-primary[data-bs-toggle="modal"]').click(function () {
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+                const risk = $(this).data('risk');
+                const info = $(this).data('info');
+
+                $('#editContentId').val(id);
+                $('#editContentName').val(name);
+                $('#editRiskStatus').val(risk);
+                $('#editContentInfo').val(info);
+            });
+
+            // Silme işlemi
+            $('.btn-outline-danger').click(function () {
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+
+                if (confirm(`"${name}" içeriğini silmek istediğinize emin misiniz?`)) {
+                    window.location.href = `/Home/DeleteContent/${id}`;
+                }
+            });
+        });
+    </script>
+} 

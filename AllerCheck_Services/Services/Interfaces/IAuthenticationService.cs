@@ -9,7 +9,8 @@ namespace AllerCheck_Services.Services.Interfaces
     {
         Task<(bool success, string message, UserDto user)> LoginAsync(LoginDto loginDto);
         Task<(bool success, string message)> RegisterAsync(RegisterDto registerDto);
-        Task<bool> ValidateUserCredentialsAsync(string username, string password);
-        Task<UserDto> GetUserByUsernameAsync(string username);
+        Task<bool> ValidateUserCredentialsAsync(string email, string password);
+        Task<UserDto> GetUserByEmailAsync(string email);
+        Task<bool> CheckUserExistsAsync(string email);
     }
 } 

@@ -13,6 +13,7 @@ using AllerCheck.API.DTOs.FavoriteListDTO;
 using AllerCheck.API.DTOs.BlackListDTO;
 using AllerCheck.API.DTOs.RegisterDTO;
 using AllerCheck.API.DTOs.LoginDTO;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace AllerCheck_Mapping.Mapping
 {
@@ -26,7 +27,7 @@ namespace AllerCheck_Mapping.Mapping
                 .ForMember(dest => dest.MailAdress, opt => opt.MapFrom(src => src.MailAdress))
                 .ForMember(dest => dest.UserPassword, opt => opt.MapFrom(src => src.UserPassword))
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.UserSurname, opt => opt.MapFrom(src => ""))
+                .ForMember(dest => dest.UserSurname, opt => opt.MapFrom(src => src.UserSurname))
                 .ForMember(dest => dest.UyelikTipiId, opt => opt.MapFrom(src => 1))
                 .ForMember(dest => dest.CreatedBy, opt => opt.MapFrom(src => 1))
                 .ForMember(dest => dest.Contacts, opt => opt.Ignore())
@@ -65,12 +66,36 @@ namespace AllerCheck_Mapping.Mapping
 
             // Product mappingi
             CreateMap<Product, ProductDto>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName))
-                .ForMember(dest => dest.ProducerName, opt => opt.MapFrom(src => src.Producer.ProducerName))
-                .ForMember(dest => dest.AddedByUserName, opt => opt.MapFrom(src => src.User.UserName))
-                .ForMember(dest => dest.Contents, opt => opt.MapFrom(src => src.ContentProducts.Select(cp => cp.Content)))
-                .ForMember(dest => dest.FavoriteListDetailId, opt => opt.MapFrom(src => src.FavoriteListDetails.FirstOrDefault().FavoriteListDetailId));
-            CreateMap<ProductDto, Product>();
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.CategoryName : string.Empty))
+                .ForMember(dest => dest.ProducerName, opt => opt.MapFrom(src => src.Producer != null ? src.Producer.ProducerName : string.Empty))
+                .ForMember(dest => dest.AddedByUserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : string.Empty))
+                .ForMember(dest => dest.Contents, opt => opt.MapFrom(src => 
+                    src.ContentProducts != null ? src.ContentProducts.Select(cp => new ContentDto 
+                    {
+                        ContentId = cp.Content.ContentId,
+                        ContentName = cp.Content.ContentName,
+                        RiskStatusName = cp.Content.RiskStatus != null ? cp.Content.RiskStatus.RiskStatusName : "Belirsiz"
+                    }) : new List<ContentDto>()))
+                .ForMember(dest => dest.FavoriteListDetailId, opt => opt.MapFrom(src => 
+                    src.FavoriteListDetails != null && src.FavoriteListDetails.Any() 
+                        ? src.FavoriteListDetails.First().FavoriteListDetailId 
+                        : 0));
+                
+            CreateMap<ProductDto, Product>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.ProductName))
+                .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
+                .ForMember(dest => dest.ProducerId, opt => opt.MapFrom(src => src.ProducerId))
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
+                .ForMember(dest => dest.ModifiedBy, opt => opt.Ignore())
+                .ForMember(dest => dest.ModifiedDate, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.Producer, opt => opt.Ignore())
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ForMember(dest => dest.ContentProducts, opt => opt.Ignore())
+                .ForMember(dest => dest.FavoriteListDetails, opt => opt.Ignore());
 
             // FavoriteList mappingi
             CreateMap<FavoriteList, FavoriteListDto>()
@@ -87,20 +112,28 @@ namespace AllerCheck_Mapping.Mapping
                         { 
                             ContentId = cp.Content.ContentId,
                             ContentName = cp.Content.ContentName,
-                            RiskStatusName = cp.Content.RiskStatus.RiskStatusName 
+                            RiskStatusName = cp.Content.RiskStatus.RiskStatusName
                         }).ToList()
                     })));
             CreateMap<FavoriteListDto, FavoriteList>();
 
-            // BlackList mappingi Todo: Buna da bir bak.Çünkü Blacklist Member gibi kullanılmış.
+            // BlackList mappingi
             CreateMap<BlackList, BlackListDto>()
-                .ForMember(dest => dest.ContentName, opt => opt.MapFrom(src => src.Content.ContentName));
+                .ForMember(dest => dest.ContentName, opt => opt.MapFrom(src => src.Content.ContentName))
+                .ForMember(dest => dest.RiskStatusName, opt => opt.MapFrom(src => src.Content.RiskStatus.RiskStatusName));
             CreateMap<BlackListDto, BlackList>();
 
-            // Todo: Content mappingi
+            // Content mappingi
             CreateMap<Content, ContentDto>()
-                .ForMember(dest => dest.RiskStatusName, opt => opt.MapFrom(src => src.RiskStatus.RiskStatusName));
-            CreateMap<ContentDto, Content>();
+                .ForMember(dest => dest.RiskStatusName, opt => opt.MapFrom(src => src.RiskStatus.RiskStatusName))
+                .ForMember(dest => dest.ContentInfo, opt => opt.MapFrom(src => src.ContentInfo));
+
+            CreateMap<ContentDto, Content>()
+                .ForMember(dest => dest.ContentName, opt => opt.MapFrom(src => src.ContentName))
+                .ForMember(dest => dest.RiskStatusId, opt => opt.MapFrom(src => src.RiskStatusId))
+                .ForMember(dest => dest.ContentInfo, opt => opt.MapFrom(src => src.ContentInfo))
+                .ForMember(dest => dest.BlackLists, opt => opt.Ignore())
+                .ForMember(dest => dest.ContentProducts, opt => opt.Ignore());
         }
     }
 }

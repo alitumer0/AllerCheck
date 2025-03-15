@@ -5,7 +5,7 @@ namespace AllerCheck.UI.Extensions
 {
     public static class SessionExtensions
     {
-        public static void SetObject<T>(this ISession session, string key, T value) // Todo: Session'da UserId varsa kullanıcı giriş yapmış demektir.
+        public static void SetObject<T>(this ISession session, string key, T value) 
         {
             session.SetString(key, JsonSerializer.Serialize(value));
         }

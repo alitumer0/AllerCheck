@@ -1,6 +1,14 @@
 @model List<AllerCheck.API.DTOs.BlackListDTO.BlackListDto>
 
 <div class="container mt-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -8,12 +16,26 @@
                     <h5 class="mb-0">
                         <i class="bi bi-x-circle"></i> Kara Listem
                     </h5>
+                    <div>
+                        <a asp-action="Profile" class="btn btn-light btn-sm me-2">
+                            <i class="bi bi-person"></i> Profilim
+                        </a>
+                        <a asp-action="FavoriteLists" class="btn btn-light btn-sm">
+                            <i class="bi bi-heart"></i> Favorilerim
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (!Model.Any())
                     {
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i> Kara listenizde henüz içerik bulunmamaktadır.
+                            <p class="mt-2 mb-0">
+                                <small>
+                                    Ürünlerdeki içerikleri inceleyerek, alerjik olduğunuz içerikleri kara listenize ekleyebilirsiniz.
+                                    Bu sayede hangi ürünlerden uzak durmanız gerektiğini kolayca takip edebilirsiniz.
+                                </small>
+                            </p>
                         </div>
                     }
                     else
@@ -21,20 +43,26 @@
                         <div class="list-group">
                             @foreach (var item in Model)
                             {
-                                <div class="list-group-item">
+                                <div class="list-group-item" id="blacklist-item-@item.BlackListId">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <h6 class="mb-1">@item.ContentName</h6>
                                             <small class="text-muted">
-                                                <i class="bi bi-exclamation-triangle"></i>                                               
+                                                <i class="bi bi-exclamation-triangle"></i> 
+                                                Risk Seviyesi: <span class="@(item.RiskStatusName == "Yüksek Risk" ? "text-danger" : 
+                                                                              item.RiskStatusName == "Orta Risk" ? "text-warning" : "text-success")">
+                                                    @item.RiskStatusName
+                                                </span>
                                             </small>
                                         </div>
-                                        <form asp-action="RemoveFromBlacklist" method="post">
-                                            <input type="hidden" name="blackListId" value="@item.BlackListId" />
-                                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                <i class="bi bi-trash"></i> Listeden Çıkar
-                                            </button>
-                                        </form>
+                                        <div>
+                                            <form asp-action="RemoveFromBlacklist" method="post" class="d-inline">
+                                                <input type="hidden" name="blackListId" value="@item.BlackListId" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-trash"></i> Listeden Çıkar
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             }
@@ -48,20 +76,16 @@
 
 @section Scripts {
     <script>
-        function removeFromBlacklist(contentId) {
-            if (confirm('Bu içeriği kara listenizden kaldırmak istediğinize emin misiniz?')) {
-                $.post('/Account/RemoveFromBlacklist', { contentId: contentId })
-                    .done(function (result) {
-                        if (result.success) {
-                            $('#content-' + contentId).fadeOut(300, function() { $(this).remove(); });
-                        } else {
-                            alert(result.message || 'Bir hata oluştu.');
-                        }
-                    })
-                    .fail(function () {
-                        alert('İşlem sırasında bir hata oluştu.');
-                    });
-            }
-        }
+        $(document).ready(function () {
+            // Alert mesajlarını otomatik kapat
+            $('.alert').delay(4000).fadeOut(350);
+
+            // Silme işlemi için onay
+            $('form').on('submit', function (e) {
+                if (!confirm('Bu içeriği kara listenizden kaldırmak istediğinize emin misiniz?')) {
+                    e.preventDefault();
+                }
+            });
+        });
     </script>
 } 

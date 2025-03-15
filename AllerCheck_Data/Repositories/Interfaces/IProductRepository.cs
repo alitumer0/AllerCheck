@@ -10,5 +10,7 @@ namespace AllerCheck_Data.Repositories.Interfaces
         Task<IEnumerable<Product>> SearchProductsAsync(string query);
         Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId);
         Task<bool> CreateProductWithContentsAsync(Product product, List<int> selectedContents);
+        Task<Product> GetProductWithContentsAsync(int productId);
+        Task<bool> UpdateProductWithContentsAsync(Product product, List<int> selectedContents);
     }
 }

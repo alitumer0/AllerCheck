@@ -1,6 +1,7 @@
 @model List<AllerCheck.API.DTOs.FavoriteListDTO.FavoriteListDto>
 
 <div class="container mt-4">
+    <h2>Favori Listem</h2>
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -21,7 +22,7 @@
             <div class="card">
                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="bi bi-heart"></i> Favori Listelerim
+                        <i class="bi bi-heart"></i> Favori Listesi
                     </h5>
                     <div>
                         <a asp-action="Profile" class="btn btn-light btn-sm me-2">
@@ -85,11 +86,60 @@
                                                     <div class="collapse mt-2" id="contents-@product.Id">
                                                         <div class="card card-body">
                                                             <ul class="list-unstyled mb-0">
-                                                                @foreach (var content in product.Contents)
+                                                                @{
+                                                                    var yuksekRiskliIcerikler = product.Contents.Where(c => c.RiskStatusName == "Yüksek Risk");
+                                                                    var ortaRiskliIcerikler = product.Contents.Where(c => c.RiskStatusName == "Orta Risk");
+                                                                    var dusukRiskliIcerikler = product.Contents.Where(c => c.RiskStatusName == "Düşük Risk");
+                                                                }
+
+                                                                @if (yuksekRiskliIcerikler.Any())
                                                                 {
-                                                                    <li>
-                                                                        <i class="bi bi-dot"></i> @content.ContentName
-                                                                        <small class="text-muted">(@content.RiskStatusName)</small>
+                                                                    <li class="mb-2">
+                                                                        <strong class="text-danger">
+                                                                            <i class="bi bi-exclamation-triangle"></i> Yüksek Riskli İçerikler
+                                                                        </strong>
+                                                                        <ul class="list-unstyled ps-3 mt-1">
+                                                                            @foreach (var content in yuksekRiskliIcerikler)
+                                                                            {
+                                                                                <li class="text-danger">
+                                                                                    <i class="bi bi-dot"></i> @content.ContentName
+                                                                                </li>
+                                                                            }
+                                                                        </ul>
+                                                                    </li>
+                                                                }
+
+                                                                @if (ortaRiskliIcerikler.Any())
+                                                                {
+                                                                    <li class="mb-2">
+                                                                        <strong class="text-warning">
+                                                                            <i class="bi bi-exclamation-circle"></i> Orta Riskli İçerikler
+                                                                        </strong>
+                                                                        <ul class="list-unstyled ps-3 mt-1">
+                                                                            @foreach (var content in ortaRiskliIcerikler)
+                                                                            {
+                                                                                <li class="text-warning">
+                                                                                    <i class="bi bi-dot"></i> @content.ContentName
+                                                                                </li>
+                                                                            }
+                                                                        </ul>
+                                                                    </li>
+                                                                }
+
+                                                                @if (dusukRiskliIcerikler.Any())
+                                                                {
+                                                                    <li class="mb-2">
+                                                                        <strong class="text-success">
+                                                                            <i class="bi bi-check-circle"></i> Düşük Riskli İçerikler
+                                                                        </strong>
+                                                                        <ul class="list-unstyled ps-3 mt-1">
+                                                                            @foreach (var content in dusukRiskliIcerikler)
+                                                                            {
+                                                                                <li class="text-success">
+                                                                                    <i class="bi bi-dot"></i> @content.ContentName
+                                                                                </li>
+                                                                            }
+                                                                        </ul>
                                                                     </li>
                                                                 }
                                                             </ul>

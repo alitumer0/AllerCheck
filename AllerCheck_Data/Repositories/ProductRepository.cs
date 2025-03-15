@@ -87,5 +87,64 @@ namespace AllerCheck_Data.Repositories
                 return false;
             }
         }
+
+        public async Task<Product> GetProductWithContentsAsync(int productId)
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Producer)
+                .Include(p => p.User)
+                .Include(p => p.ContentProducts)
+                    .ThenInclude(cp => cp.Content)
+                        .ThenInclude(c => c.RiskStatus)
+                .FirstOrDefaultAsync(p => p.ProductId == productId);
+        }
+
+        public async Task<bool> UpdateProductWithContentsAsync(Product product, List<int> selectedContents)
+        {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var existingProduct = await _context.Products
+                        .Include(p => p.ContentProducts)
+                        .FirstOrDefaultAsync(p => p.ProductId == product.ProductId);
+
+                    if (existingProduct == null)
+                    {
+                        return false;
+                    }
+
+                    // Ürün bilgilerini güncelle
+                    _context.Entry(existingProduct).CurrentValues.SetValues(product);
+
+                    // Mevcut içerikleri kaldır
+                    _context.ContentProducts.RemoveRange(existingProduct.ContentProducts);
+
+                    // Yeni içerikleri ekle
+                    if (selectedContents != null && selectedContents.Any())
+                    {
+                        foreach (var contentId in selectedContents)
+                        {
+                            var contentProduct = new ContentProduct
+                            {
+                                ProductId = product.ProductId,
+                                ContentId = contentId
+                            };
+                            await _context.ContentProducts.AddAsync(contentProduct);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return true;
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+            }
+        }
     }
 }
