@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AllerCheck_Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 
 namespace AllerCheck_Data.Context
 {   
@@ -28,6 +29,10 @@ namespace AllerCheck_Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // PostgreSQL için büyük/küçük harf duyarlılığı ayarı
+            modelBuilder.HasDefaultSchema("public");
+            modelBuilder.HasCollation("und-x-icu", "und-x-icu");
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("Uye");
