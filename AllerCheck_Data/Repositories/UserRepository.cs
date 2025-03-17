@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Microsoft.Extensions.Configuration;
 using System.Data;
+using Dapper;
 
 namespace AllerCheck_Data.Repositories
 {
@@ -198,6 +199,21 @@ namespace AllerCheck_Data.Repositories
         public async Task<bool> CheckUserExistsAsync(string email)
         {
             return await _db.Users.AnyAsync(u => u.MailAdress == email);
+        }
+
+        public async Task<User> GetByEmailAndPasswordAsync(string email, string password)
+        {
+            var query = @"
+                SELECT * FROM uye 
+                WHERE ""MailAdress"" = @email 
+                AND ""UserPassword"" = @password";
+
+            var parameters = new { email, password };
+            
+            using (var connection = CreateConnection())
+            {
+                return await connection.QueryFirstOrDefaultAsync<User>(query, parameters);
+            }
         }
 
         protected IDbConnection CreateConnection()
