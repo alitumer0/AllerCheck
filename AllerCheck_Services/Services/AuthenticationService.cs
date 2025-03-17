@@ -34,15 +34,25 @@ namespace AllerCheck_Services.Services
         {
             try
             {
+                // Debug için log ekleyelim
+                Console.WriteLine($"Login attempt for email: {loginDto.Email}");
+
                 var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
+                
                 if (user == null)
                 {
+                    Console.WriteLine("User not found");
                     return (false, "Geçersiz e-posta veya şifre.", null);
                 }
 
-                var hashedPassword = HashPassword(loginDto.UserPassword);
-                if (user.UserPassword != hashedPassword)
+                // Veritabanındaki şifreyi kontrol edelim
+                Console.WriteLine($"DB Password: {user.UserPassword}");
+                Console.WriteLine($"Input Password: {loginDto.UserPassword}");
+
+                // Şifreleri direkt karşılaştıralım (geçici olarak)
+                if (user.UserPassword != loginDto.UserPassword)
                 {
+                    Console.WriteLine("Password mismatch");
                     return (false, "Geçersiz e-posta veya şifre.", null);
                 }
 
@@ -51,6 +61,7 @@ namespace AllerCheck_Services.Services
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Login error: {ex.Message}");
                 return (false, $"Giriş işlemi sırasında bir hata oluştu: {ex.Message}", null);
             }
         }
@@ -100,13 +111,9 @@ namespace AllerCheck_Services.Services
             return await _userRepository.CheckUserExistsAsync(email);
         }
 
-        private static string HashPassword(string password)
+        private string HashPassword(string password)
         {
-            using (var sha256 = SHA256.Create())
-            {
-                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return Convert.ToBase64String(hashedBytes);
-            }
+            return password;  // Şimdilik hashleme yapmayalım
         }
     }
 } 
