@@ -13,6 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// AutoMapper configuration
+builder.Services.AddAutoMapper(typeof(MapProfile));
 
 builder.Services.AddSession(options =>
 {
@@ -49,8 +51,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddDbContext<AllerCheckDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddAutoMapper(typeof(MapProfile));
 
 var app = builder.Build();
 
