@@ -29,14 +29,11 @@ namespace AllerCheck_Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-            
             modelBuilder.HasDefaultSchema("public");
-            modelBuilder.HasCollation("und-x-icu", "und-x-icu");
 
             modelBuilder.Entity<User>(entity =>
             {
-                entity.ToTable("Users");
+                entity.ToTable("uye");
                 entity.Property(e => e.UserId).HasColumnName("UyeId");
                 entity.Property(e => e.UserName).HasColumnName("UyeAdi");
                 entity.Property(e => e.UserSurname).HasColumnName("UyeSoyadi");
@@ -57,7 +54,7 @@ namespace AllerCheck_Data.Context
 
             modelBuilder.Entity<Category>(entity =>
             {
-                entity.ToTable("Kategori");
+                entity.ToTable("kategori");
                 entity.Property(e => e.CategoryId).HasColumnName("KategoriId");
                 entity.Property(e => e.CategoryName).HasColumnName("KategoriAdi");
                 entity.Property(e => e.TopCategoryId).HasColumnName("UstKategoriId");
@@ -69,7 +66,7 @@ namespace AllerCheck_Data.Context
 
             modelBuilder.Entity<Content>(entity =>
             {
-                entity.ToTable("Icerik");
+                entity.ToTable("icerik");
                 entity.Property(e => e.ContentId).HasColumnName("IcerikId");
                 entity.Property(e => e.ContentName).HasColumnName("IcerikAdi");
                 entity.Property(e => e.ContentInfo).HasColumnName("IcerikBilgi");
@@ -85,7 +82,7 @@ namespace AllerCheck_Data.Context
 
             modelBuilder.Entity<ContentProduct>(entity =>
             {
-                entity.ToTable("UrunIcerik");
+                entity.ToTable("urunicerik");
                 entity.Property(e => e.ContentProductId).HasColumnName("UrunIcerikId");
                 entity.Property(e => e.ContentId).HasColumnName("IcerikId");
                 entity.Property(e => e.ProductId).HasColumnName("UrunId");
@@ -116,7 +113,7 @@ namespace AllerCheck_Data.Context
 
             modelBuilder.Entity<BlackList>(entity =>
             {
-                entity.ToTable("KaraListe");
+                entity.ToTable("karaliste");
                 entity.Property(e => e.BlackListId).HasColumnName("KaraListeId");
                 entity.Property(e => e.UserId).HasColumnName("UyeId");
                 entity.Property(e => e.ContentId).HasColumnName("IcerikId");
@@ -134,7 +131,7 @@ namespace AllerCheck_Data.Context
 
             modelBuilder.Entity<FavoriteList>(entity =>
             {
-                entity.ToTable("FavoriListesi");
+                entity.ToTable("favorilistesi");
                 entity.Property(e => e.FavoriteListId).HasColumnName("FavoriListesiId");
                 entity.Property(e => e.ListName).HasColumnName("ListeAdi");
                 entity.Property(e => e.UserId).HasColumnName("UyeId");
@@ -165,14 +162,14 @@ namespace AllerCheck_Data.Context
 
             modelBuilder.Entity<Producer>(entity =>
             {
-                entity.ToTable("Uretici");
+                entity.ToTable("uretici");
                 entity.Property(e => e.ProducerId).HasColumnName("UreticiId");
                 entity.Property(e => e.ProducerName).HasColumnName("UreticiAdi");
             });
 
             modelBuilder.Entity<Product>(entity =>
             {
-                entity.ToTable("Urun");
+                entity.ToTable("urun");
                 entity.Property(e => e.ProductId).HasColumnName("UrunId");
                 entity.Property(e => e.ProductName).HasColumnName("UrunAdi");
                 entity.Property(e => e.CategoryId).HasColumnName("KategoriId");
@@ -202,9 +199,14 @@ namespace AllerCheck_Data.Context
 
             modelBuilder.Entity<RiskStatus>(entity =>
             {
-                entity.ToTable("RiskDurumu");
+                entity.ToTable("riskdurumu");
                 entity.Property(e => e.RiskStatusId).HasColumnName("RiskDurumId");
                 entity.Property(e => e.RiskStatusName).HasColumnName("RiskSeviyesi");
+            });
+
+            modelBuilder.Entity<UyelikTipi>(entity =>
+            {
+                entity.ToTable("uyeliktipi");
             });
 
             OnModelCreatingPartial(modelBuilder);
