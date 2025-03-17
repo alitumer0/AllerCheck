@@ -34,14 +34,12 @@ namespace AllerCheck_Data.Context
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("uye");
-                entity.Property(e => e.UserId).HasColumnName("UyeId");
-                entity.Property(e => e.UserName).HasColumnName("UyeAdi");
-                entity.Property(e => e.UserSurname).HasColumnName("UyeSoyadi");
-                entity.Property(e => e.MailAdress).HasColumnName("MailAdresi");
-                entity.Property(e => e.UserPassword).HasColumnName("UyeSifre");
-                entity.Property(e => e.CreatedDate)
-                    .HasColumnName("UyelikTarihi")
-                    .HasDefaultValue(DateTime.Now);
+                entity.Property(e => e.UserId).HasColumnName("uyeid");
+                entity.Property(e => e.UserName).HasColumnName("uyeadi");
+                entity.Property(e => e.UserSurname).HasColumnName("uyesoyadi");
+                entity.Property(e => e.MailAdress).HasColumnName("mailadresi");
+                entity.Property(e => e.UserPassword).HasColumnName("uyesifre");
+                entity.Property(e => e.CreatedDate).HasColumnName("createddate");
                 entity.Property(e => e.UyelikTipiId).HasColumnName("UyelikTipiId");
                 entity.Property(e => e.CreatedBy).HasColumnName("CreatedBy");
 

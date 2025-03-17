@@ -50,28 +50,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 // PostgreSQL bağlantısı
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-if (!string.IsNullOrEmpty(connectionString) && connectionString.StartsWith("postgresql://"))
-{
-    // Connection string'i uygun formata dönüştür
-    var uri = new Uri(connectionString);
-    var userInfo = uri.UserInfo.Split(':');
-    
-    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.Trim('/')};Username={userInfo[0]};Password={userInfo[1]};Include Error Detail=true;SSL Mode=Require;Trust Server Certificate=true;Timeout=30;Command Timeout=30;Retry=3";
-}
-else
-{
-    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-}
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? 
+    builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AllerCheckDbContext>(options =>
-    options.UseNpgsql(connectionString, npgsqlOptions =>
-    {
-        npgsqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 3,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorCodesToAdd: null);
-    }));
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 

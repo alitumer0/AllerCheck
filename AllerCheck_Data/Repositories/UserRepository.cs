@@ -7,16 +7,21 @@ using AllerCheck_Core.Entities;
 using AllerCheck_Data.Repositories.Interfaces;
 using AllerCheck_Data.Context;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using Microsoft.Extensions.Configuration;
+using System.Data;
 
 namespace AllerCheck_Data.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private readonly AllerCheckDbContext _db;
+        private readonly IConfiguration _configuration;
 
-        public UserRepository(AllerCheckDbContext db)
+        public UserRepository(AllerCheckDbContext db, IConfiguration configuration)
         {
             _db = db;
+            _configuration = configuration;
         }
 
         public async Task<IEnumerable<User>> GetAllActiveUsersAsync()
@@ -193,6 +198,11 @@ namespace AllerCheck_Data.Repositories
         public async Task<bool> CheckUserExistsAsync(string email)
         {
             return await _db.Users.AnyAsync(u => u.MailAdress == email);
+        }
+
+        protected IDbConnection CreateConnection()
+        {
+            return new NpgsqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         }
     }
 }
