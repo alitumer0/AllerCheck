@@ -34,19 +34,19 @@ namespace AllerCheck_Data.Context
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("uye");
-                entity.Property(e => e.UserId).HasColumnName("Id");
-                entity.Property(e => e.UserName).HasColumnName("UserName");
-                entity.Property(e => e.UserSurname).HasColumnName("UserSurname");
-                entity.Property(e => e.MailAdress).HasColumnName("MailAdress");
-                entity.Property(e => e.UserPassword).HasColumnName("UserPassword");
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedDate");
-                entity.Property(e => e.UyelikTipiId).HasColumnName("UyelikTipiId");
-                entity.Property(e => e.CreatedBy).HasColumnName("CreatedBy");
+                entity.Property(e => e.UserId).HasColumnName("uyeid");
+                entity.Property(e => e.UserName).HasColumnName("uyeadi");
+                entity.Property(e => e.UserSurname).HasColumnName("uyesoyadi");
+                entity.Property(e => e.MailAdress).HasColumnName("mailadresi");
+                entity.Property(e => e.UserPassword).HasColumnName("uyesifre");
+                entity.Property(e => e.CreatedDate).HasColumnName("uyeliktarihi");
+                entity.Property(e => e.UyelikTipiId).HasColumnName("uyeliktipiid");
+                entity.Property(e => e.CreatedBy).HasColumnName("createdby");
 
                 entity.HasOne(d => d.UyelikTipi)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UyelikTipiId)
-                    .HasConstraintName("FK_Uye_UyelikTipi");
+                    .HasConstraintName("fk_uye_uyeliktipi");
             });
 
             modelBuilder.Entity<Category>(entity =>
@@ -67,22 +67,21 @@ namespace AllerCheck_Data.Context
                 entity.Property(e => e.ContentId).HasColumnName("icerikid");
                 entity.Property(e => e.ContentName).HasColumnName("icerikadi");
                 entity.Property(e => e.ContentInfo).HasColumnName("icerikbilgi");
-                entity.Property(e => e.RiskStatusId)
-                    .HasColumnName("riskdurumid");
+                entity.Property(e => e.RiskStatusId).HasColumnName("riskdurumid");
 
                 entity.HasOne(d => d.RiskStatus)
                     .WithMany(p => p.Contents)
                     .HasForeignKey(d => d.RiskStatusId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Icerik_RiskDurumu");
+                    .HasConstraintName("fk_icerik_riskdurumu");
             });
 
             modelBuilder.Entity<ContentProduct>(entity =>
             {
                 entity.ToTable("urunicerik");
-                entity.Property(e => e.ContentProductId).HasColumnName("UrunIcerikId");
-                entity.Property(e => e.ContentId).HasColumnName("IcerikId");
-                entity.Property(e => e.ProductId).HasColumnName("UrunId");
+                entity.Property(e => e.ContentProductId).HasColumnName("urunicerikid");
+                entity.Property(e => e.ContentId).HasColumnName("icerikid");
+                entity.Property(e => e.ProductId).HasColumnName("urunid");
 
                 entity.HasOne(d => d.Content)
                     .WithMany(p => p.ContentProducts)
@@ -97,10 +96,10 @@ namespace AllerCheck_Data.Context
 
             modelBuilder.Entity<Contact>(entity =>
             {
-                entity.ToTable("Iletisim");
-                entity.Property(e => e.ContactId).HasColumnName("IletisimId");
-                entity.Property(e => e.Message).HasColumnName("Mesaj");
-                entity.Property(e => e.UserId).HasColumnName("UyeId");
+                entity.ToTable("iletisim");
+                entity.Property(e => e.ContactId).HasColumnName("iletisimid");
+                entity.Property(e => e.Message).HasColumnName("mesaj");
+                entity.Property(e => e.UserId).HasColumnName("uyeid");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Contacts)
@@ -199,13 +198,15 @@ namespace AllerCheck_Data.Context
             modelBuilder.Entity<RiskStatus>(entity =>
             {
                 entity.ToTable("riskdurumu");
-                entity.Property(e => e.RiskStatusId).HasColumnName("RiskDurumId");
-                entity.Property(e => e.RiskStatusName).HasColumnName("RiskSeviyesi");
+                entity.Property(e => e.RiskStatusId).HasColumnName("riskdurumid");
+                entity.Property(e => e.RiskStatusName).HasColumnName("riskseviyesi");
             });
 
             modelBuilder.Entity<UyelikTipi>(entity =>
             {
                 entity.ToTable("uyeliktipi");
+                entity.Property(e => e.UyelikTipiId).HasColumnName("uyeliktipiid");
+                entity.Property(e => e.TipAdi).HasColumnName("uyeliktipiadi");
             });
 
             OnModelCreatingPartial(modelBuilder);
