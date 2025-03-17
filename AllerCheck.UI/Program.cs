@@ -10,6 +10,9 @@ using AllerCheck_Data.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Development mode'u aktif et
+builder.Environment.EnvironmentName = "Development";
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -50,20 +53,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 // PostgreSQL bağlantısı
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? 
-    builder.Configuration.GetConnectionString("DefaultConnection");
-
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AllerCheckDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts(); 
-}
+// Hata ayıklama için
+app.UseDeveloperExceptionPage();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
