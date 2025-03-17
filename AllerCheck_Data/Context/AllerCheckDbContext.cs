@@ -46,16 +46,15 @@ namespace AllerCheck_Data.Context
                 entity.HasOne(d => d.UyelikTipi)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UyelikTipiId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Uye_UyelikTipi");
             });
 
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.ToTable("kategori");
-                entity.Property(e => e.CategoryId).HasColumnName("KategoriId");
-                entity.Property(e => e.CategoryName).HasColumnName("KategoriAdi");
-                entity.Property(e => e.TopCategoryId).HasColumnName("UstKategoriId");
+                entity.Property(e => e.CategoryId).HasColumnName("kategoriid");
+                entity.Property(e => e.CategoryName).HasColumnName("kategoriadi");
+                entity.Property(e => e.TopCategoryId).HasColumnName("ustkategoriid");
                 entity.HasOne(d => d.TopCategory)
                     .WithMany(p => p.InverseTopCategory)
                     .HasForeignKey(d => d.TopCategoryId)
@@ -65,11 +64,11 @@ namespace AllerCheck_Data.Context
             modelBuilder.Entity<Content>(entity =>
             {
                 entity.ToTable("icerik");
-                entity.Property(e => e.ContentId).HasColumnName("IcerikId");
-                entity.Property(e => e.ContentName).HasColumnName("IcerikAdi");
-                entity.Property(e => e.ContentInfo).HasColumnName("IcerikBilgi");
+                entity.Property(e => e.ContentId).HasColumnName("icerikid");
+                entity.Property(e => e.ContentName).HasColumnName("icerikadi");
+                entity.Property(e => e.ContentInfo).HasColumnName("icerikbilgi");
                 entity.Property(e => e.RiskStatusId)
-                    .HasColumnName("RiskDurumId");
+                    .HasColumnName("riskdurumid");
 
                 entity.HasOne(d => d.RiskStatus)
                     .WithMany(p => p.Contents)
@@ -112,9 +111,9 @@ namespace AllerCheck_Data.Context
             modelBuilder.Entity<BlackList>(entity =>
             {
                 entity.ToTable("karaliste");
-                entity.Property(e => e.BlackListId).HasColumnName("KaraListeId");
-                entity.Property(e => e.UserId).HasColumnName("UyeId");
-                entity.Property(e => e.ContentId).HasColumnName("IcerikId");
+                entity.Property(e => e.BlackListId).HasColumnName("karalisteid");
+                entity.Property(e => e.UserId).HasColumnName("uyeid");
+                entity.Property(e => e.ContentId).HasColumnName("icerikid");
 
                 entity.HasOne(d => d.Content)
                     .WithMany(p => p.BlackLists)
@@ -130,9 +129,9 @@ namespace AllerCheck_Data.Context
             modelBuilder.Entity<FavoriteList>(entity =>
             {
                 entity.ToTable("favorilistesi");
-                entity.Property(e => e.FavoriteListId).HasColumnName("FavoriListesiId");
-                entity.Property(e => e.ListName).HasColumnName("ListeAdi");
-                entity.Property(e => e.UserId).HasColumnName("UyeId");
+                entity.Property(e => e.FavoriteListId).HasColumnName("favorilistesiid");
+                entity.Property(e => e.ListName).HasColumnName("listeadi");
+                entity.Property(e => e.UserId).HasColumnName("uyeid");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.FavoriteLists)
@@ -168,13 +167,15 @@ namespace AllerCheck_Data.Context
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.ToTable("urun");
-                entity.Property(e => e.ProductId).HasColumnName("UrunId");
-                entity.Property(e => e.ProductName).HasColumnName("UrunAdi");
-                entity.Property(e => e.CategoryId).HasColumnName("KategoriId");
-                entity.Property(e => e.ProducerId).HasColumnName("UreticiId");
-                entity.Property(e => e.UserId).HasColumnName("UyeId");
-                entity.Property(e => e.CreatedDate).HasColumnName("UrunKayitTarihi");
-                entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
+                entity.Property(e => e.ProductId).HasColumnName("urunid");
+                entity.Property(e => e.ProductName).HasColumnName("urunadi");
+                entity.Property(e => e.CategoryId).HasColumnName("kategoriid");
+                entity.Property(e => e.ProducerId).HasColumnName("ureticiid");
+                entity.Property(e => e.UserId).HasColumnName("uyeid");
+                entity.Property(e => e.CreatedBy).HasColumnName("createdby");
+                entity.Property(e => e.CreatedDate).HasColumnName("createddate");
+                entity.Property(e => e.ModifiedBy).HasColumnName("modifiedby");
+                entity.Property(e => e.ModifiedDate).HasColumnName("modifieddate");
 
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.Products)
