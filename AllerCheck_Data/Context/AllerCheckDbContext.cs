@@ -29,13 +29,14 @@ namespace AllerCheck_Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // PostgreSQL için büyük/küçük harf duyarlılığı ayarı
+            base.OnModelCreating(modelBuilder);
+            
             modelBuilder.HasDefaultSchema("public");
             modelBuilder.HasCollation("und-x-icu", "und-x-icu");
 
             modelBuilder.Entity<User>(entity =>
             {
-                entity.ToTable("Uye");
+                entity.ToTable("Users");
                 entity.Property(e => e.UserId).HasColumnName("UyeId");
                 entity.Property(e => e.UserName).HasColumnName("UyeAdi");
                 entity.Property(e => e.UserSurname).HasColumnName("UyeSoyadi");
