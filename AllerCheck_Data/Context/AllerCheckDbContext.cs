@@ -160,8 +160,8 @@ namespace AllerCheck_Data.Context
             modelBuilder.Entity<Producer>(entity =>
             {
                 entity.ToTable("uretici");
-                entity.Property(e => e.ProducerId).HasColumnName("UreticiId");
-                entity.Property(e => e.ProducerName).HasColumnName("UreticiAdi");
+                entity.Property(e => e.ProducerId).HasColumnName("ureticiid");
+                entity.Property(e => e.ProducerName).HasColumnName("ureticiadi");
             });
 
             modelBuilder.Entity<Product>(entity =>

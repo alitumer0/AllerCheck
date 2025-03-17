@@ -28,6 +28,7 @@ namespace AllerCheck_Data.Repositories
                 .Include(p => p.ContentProducts)
                     .ThenInclude(cp => cp.Content)
                         .ThenInclude(c => c.RiskStatus)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
